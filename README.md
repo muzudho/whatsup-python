@@ -1,6 +1,6 @@
 # whatsup_python
 
-Python 初級者用のレベル３  
+Python 初級者用レッスンのレベル３  
 
 各レベルは以下の通りです  
 
