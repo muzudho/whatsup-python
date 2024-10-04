@@ -2,10 +2,11 @@
 
 Python 初級者用のレベル３  
 
-他のレベルは以下にあります  
+各レベルは以下の通りです  
 
 * 📖 [Lv.1 こんにちわ！パイソン](https://github.com/muzudho/hello-python)
 * 📖 [Lv.2 どうだい？パイソン](https://github.com/muzudho/howdy_python)
+* 📖 `Lv.3 どうした？パイソン` - ここ
 
 
 # 指導者向けの説明
