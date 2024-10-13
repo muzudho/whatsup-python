@@ -5,7 +5,7 @@ Python 初級者用レッスンのレベル３
 各レベルは以下の通りです  
 
 * 📖 [Lv.1 こんにちわ！パイソン](https://github.com/muzudho/hello-python)
-* 📖 [Lv.2 どうだい？パイソン](https://github.com/muzudho/howdy_python)
+* 📖 [Lv.2 どうだい？パイソン](https://github.com/muzudho/howdy-python)
 * 📖 `Lv.3 どうした？パイソン` - ここ
 
 
