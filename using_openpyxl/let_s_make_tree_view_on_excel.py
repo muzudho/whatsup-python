@@ -102,11 +102,8 @@ class TreeDrawer():
         # 事前送り出し
         self.forward_cursor(next_record=next_record)
 
-        curr_row_number = next_row_number - 1
-        curr_row_th = curr_row_number + 1
-
         if self._curr_record.no is None:
-            print(f"[{datetime.datetime.now()}] {curr_row_th}行目 現在レコードのnoがナンだから無視（先読みのため、初回は空回し）")
+            print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 現在レコードのnoがナンだから無視（先読みのため、初回は空回し）")
             pass
 
 
@@ -118,6 +115,7 @@ class TreeDrawer():
             # ３行目～６行目
             # --------------
             # データは３行目から、１かたまり３行を使って描画する
+            curr_row_number = next_row_number - 1
             row1_th = curr_row_number * 3 + 3
             row2_th = curr_row_number * 3 + 3 + 1
             row3_th = curr_row_number * 3 + 3 + 2
@@ -176,22 +174,16 @@ class TreeDrawer():
                 nd = self._curr_record.node_at(node_th=node_th)
 
                 if nd is None:
-                    print(f"[{datetime.datetime.now()}] {curr_row_th}行目 {node_th}節  nd がナンのノードは無視")
+                    print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節  nd がナンのノードは無視")
                     return
 
                 elif pd.isnull(nd.text):
-                    print(f"[{datetime.datetime.now()}] {curr_row_th}行目 {node_th}節  nd.text が NaN のノードは無視")
+                    print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節  nd.text が NaN のノードは無視")
                     return
-
-                elif prerow_nd is None:
-                    # 前行が無ければ描画
-                    pass
 
 
                 # 以下、描画
-                if curr_row_th != self._curr_record.no:
-                    raise ValueError(f"行番号がずれている {curr_row_th=}  {self._curr_record.no=}")
-                print(f"[{datetime.datetime.now()}] {curr_row_th}行目 {node_th}節 ノード描画...")
+                print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節 ノード描画...")
 
 
                 cn1 = three_column_names[0]
@@ -216,14 +208,14 @@ class TreeDrawer():
                             curr_record=self._curr_record,
                             prev_record=self._prev_record,
                             node_th=node_th):
-                        print(f"[{datetime.datetime.now()}] {curr_row_th}行目 {node_th}節  垂直線")
+                        print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節  垂直線")
                         
                         ws[f'{cn2}{row1_th}'].border = leftside_border_to_vertical
                         ws[f'{cn2}{row2_th}'].border = leftside_border_to_vertical
                         ws[f'{cn2}{row3_th}'].border = leftside_border_to_vertical
                     
                     else:
-                        print(f"[{datetime.datetime.now()}] {curr_row_th}行目 {node_th}節  空欄")
+                        print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節  空欄")
                         pass
 
                     return
@@ -282,23 +274,23 @@ class TreeDrawer():
 
                 if kind == 'Horizontal':
                     ws[f'{cn2}{row1_th}'].border = under_border_to_child_horizontal
-                    print(f"[{datetime.datetime.now()}] {curr_row_th}行目 {node_th}節  水平線")
+                    print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節  水平線")
                 
                 elif kind == 'Down':
                     ws[f'{cn2}{row1_th}'].border = under_border_to_child_down
                     ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_down
                     ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_down
-                    print(f"[{datetime.datetime.now()}] {curr_row_th}行目 {node_th}節  ダウン線")
+                    print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節  ダウン線")
 
                 elif kind == 'TLetter':
                     ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_t_letter
                     ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_t_letter
                     ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_t_letter
-                    print(f"[{datetime.datetime.now()}] {curr_row_th}行目 {node_th}節  Ｔ字線")
+                    print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節  Ｔ字線")
 
                 elif kind == 'Up':
                     ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_up
-                    print(f"[{datetime.datetime.now()}] {curr_row_th}行目 {node_th}節  アップ線")
+                    print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節  アップ線")
                 
                 else:
                     raise ValueError(f"{kind=}")
@@ -316,6 +308,14 @@ class TreeDrawer():
                 """
 
                 node = self._curr_record.node_at(node_th=node_th)
+
+                if node is None:
+                    print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節  nd がナンのノードは無視")
+                    return
+
+                elif pd.isnull(node.text):
+                    print(f"[{datetime.datetime.now()}] {self._curr_record.no}行目 {node_th}節  nd.text が NaN のノードは無視")
+                    return
 
                 cn3 = three_column_names[2]
                 row1_th = three_row_numbers[0]
@@ -342,13 +342,13 @@ class TreeDrawer():
 
             # 第０節
             # ------
-            draw_node(node_th=0, three_column_names=[None, None, 'A'], three_row_numbers=three_row_numbers)
+            draw_node(node_th=0, three_column_names=[None, None, 'C'], three_row_numbers=three_row_numbers)
 
 
             # 第１節
             # ------
             node_th = 1
-            three_column_names=['C', 'D', 'E']
+            three_column_names=['D', 'E', 'F']
             draw_edge(node_th=node_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
             draw_node(node_th=node_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
 
@@ -356,7 +356,7 @@ class TreeDrawer():
             # 第２節
             # ------
             node_th = 2
-            three_column_names=['F', 'G', 'H']
+            three_column_names=['G', 'H', 'I']
             draw_edge(node_th=node_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
             draw_node(node_th=node_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
 
@@ -364,7 +364,7 @@ class TreeDrawer():
             # 第３節
             # ------
             node_th = 3
-            three_column_names=['I', 'J', 'K']
+            three_column_names=['J', 'K', 'L']
             draw_edge(node_th=node_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
             draw_node(node_th=node_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
 
@@ -372,7 +372,7 @@ class TreeDrawer():
             # 第４節
             # ------
             node_th = 4
-            three_column_names=['L', 'M', 'N']
+            three_column_names=['M', 'N', 'O']
             draw_edge(node_th=node_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
             draw_node(node_th=node_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
 
