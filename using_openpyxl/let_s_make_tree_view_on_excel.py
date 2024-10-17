@@ -407,11 +407,12 @@ class TreeEraser():
         row_th_of_last_underline = -1
 
 
-        # 行番号は 4 から
-        row_th = 4
+        # 第3行から
+        row_th = 3
         while row_th <= ws.max_row: # 最終行まで全部見る
 
-            while True:
+            while True: # 仕切り直しの１セット
+                shall_break = False
 
                 # 罫線を確認
                 #
@@ -421,48 +422,56 @@ class TreeEraser():
                 #
                 border = ws[f'{column_alphabet}{row_th}'].border
                 if border is not None:
-                    #print(f"[{datetime.datetime.now()}] 消しゴム {row_th=} 境界線有り {border=}")
+                    #print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 境界線有り {border=}")
 
                     there_no_border = True
 
                     if border.left is not None:
-                        #print(f"[{datetime.datetime.now()}] 消しゴム {row_th=} {border.left.style=}")
+                        #print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 {border.left.style=}")
                         if border.left.style == 'thick':
                             there_no_border = False
-                            #print(f"[{datetime.datetime.now()}] 消しゴム {row_th=} 左側に罫線")
+                            #print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 左側に罫線")
 
-                    if border.bottom is not None:
-                        #print(f"[{datetime.datetime.now()}] 消しゴム {row_th=} {border.bottom.style=}")
-                        if border.bottom.style == 'thick':
-                            there_no_border = False
-                            row_th_of_last_underline = row_th
-                            print(f"[{datetime.datetime.now()}] 消しゴム {row_th=} アンダーライン")
+                    # セル下辺に太い罫線が引かれていたら、それが第何行か覚えておく
+                    if border.bottom is not None and border.bottom.style == 'thick':
+                        there_no_border = False
+                        row_th_of_last_underline = row_th
+                        print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 最後に見つけたアンダーラインが第何行か覚えておく（第{row_th_of_last_underline}行）")
 
-                    # 境界線が無かったらループを抜ける
+                    # 境界線が無かったら仕切り直し
                     if there_no_border:
-                        print(f"[{datetime.datetime.now()}] 消しゴム {row_th=} ループ抜ける {ws.max_row=}")
-                        break
+                        print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 境界線が無かったので仕切り直し")
+                        shall_break = True
+
 
                 row_th += 1
 
-            print(f"[{datetime.datetime.now()}] 消しゴムを掛けたい行の番号 {row_th_of_last_underline+1}～{row_th-1}")
-            # 消しゴムを掛ける
-            if row_th_of_last_underline != -1:
-                for temp_row_th in range(row_th_of_last_underline+1, row_th):
-                    ws[f'{column_alphabet}{temp_row_th}'].border = None
+                if shall_break:
+                    break
 
-            # 次行から続行
-            row_th += 1
+
+            #print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 仕切り直し")
+
+            # 消しゴムを掛ける
+            start_row_to_erase = row_th_of_last_underline + 1
+            end_row_to_erase = row_th - 1 # 次の行を指しているので、１行前を見る。終端はその数を含まない
+            if row_th_of_last_underline != -1 and start_row_to_erase < end_row_to_erase:
+                print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列 消しゴムを掛けたいのは第{start_row_to_erase}～{end_row_to_erase - 1}行")
+                for row_th_to_erase in range(start_row_to_erase, end_row_to_erase):
+                    ws[f'{column_alphabet}{row_th_to_erase}'].border = None
+
+
+        print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 消しゴム掛け終わり（最終は第{ws.max_row}行）")
 
 
     def execute(self):
 
         # TODO 可変長に対応したい
-        # G列の左側の垂直線を見ていく
-        self.erase_unnecessary_border_by_column(column_alphabet='G')
-        self.erase_unnecessary_border_by_column(column_alphabet='J')
-        self.erase_unnecessary_border_by_column(column_alphabet='M')
-        self.erase_unnecessary_border_by_column(column_alphabet='P')
+        # 指定の列の左側の垂直の罫線を見ていく
+        self.erase_unnecessary_border_by_column(column_alphabet='E')
+        self.erase_unnecessary_border_by_column(column_alphabet='H')
+        self.erase_unnecessary_border_by_column(column_alphabet='K')
+        self.erase_unnecessary_border_by_column(column_alphabet='N')
 
 
 ########################################
