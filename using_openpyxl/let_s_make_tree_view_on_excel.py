@@ -12,8 +12,8 @@ import openpyxl as xl
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.borders import Border, Side
 
-from library.database import TreeNode, TreeRecord, TreeTable
-from library.views.tree import TreeView
+from xl_tree.database import TreeNode, TreeRecord, TreeTable
+from xl_tree.models import TreeModel
 
 CSV_FILE_PATH = '../data/tree_shiritori.csv'
 WB_FILE_PATH = '../temp/tree.xlsx'
@@ -157,36 +157,35 @@ class TreeDrawer():
                 BLACK = '000000'
                 side = Side(style='thick', color=BLACK)
 
-                # DEBUG_POINT
-                # 罫線に色を付けると、デバッグしやすいです
+                # DEBUG_TIPS: 罫線に色を付けると、デバッグしやすいです
                 if True:
                     red_side = Side(style='thick', color=BLACK)
                     orange_side = Side(style='thick', color=BLACK)
                     green_side = Side(style='thick', color=BLACK)
                     blue_side = Side(style='thick', color=BLACK)
                     cyan_side = Side(style='thick', color=BLACK)
-                    magenta_side = Side(style='thick', color=BLACK)
+                    #magenta_side = Side(style='thick', color=BLACK)
                 else:
                     red_side = Side(style='thick', color='FF0000')
                     orange_side = Side(style='thick', color='FFCC00')
                     green_side = Side(style='thick', color='00FF00')
                     blue_side = Side(style='thick', color='0000FF')
                     cyan_side = Side(style='thick', color='00FFFF')
-                    magenta_side = Side(style='thick', color='FF00FF')
+                    #magenta_side = Side(style='thick', color='FF00FF')
 
-                # ─字接続は赤
+                # ─字  赤
                 border_to_parent_horizontal = Border(bottom=red_side)
                 under_border_to_child_horizontal = Border(bottom=red_side)
-                # │字接続は緑
+                # │字  緑
                 leftside_border_to_vertical = Border(left=green_side)
-                # ┬字接続は青
+                # ┬字  青
                 border_to_parent_downward = Border(bottom=blue_side)
                 under_border_to_child_downward = Border(bottom=blue_side)
                 leftside_border_to_child_downward = Border(left=blue_side)
-                # ├字接続は青緑
+                # ├字  青緑
                 l_letter_border_to_child_rightward = Border(left=cyan_side, bottom=cyan_side)
                 leftside_border_to_child_rightward = Border(left=cyan_side)
-                # └字接続は橙
+                # └字  橙
                 l_letter_border_to_child_upward = Border(left=orange_side, bottom=orange_side)
 
 
@@ -211,50 +210,29 @@ class TreeDrawer():
                 row3_th = three_row_numbers[2]
 
 
-                # 先祖から自分までが同じノードテキストのレコードが続くなら
-                if TreeView.is_same_between_ancestor_and_myself_as_avobe(
+                # 自件と前件を比較して、根から自ノードまで、ノードテキストが等しいか？
+                if TreeModel.is_same_path_as_avobe(
                         curr_record=self._curr_record,
                         prev_record=self._prev_record,
                         depth_th=depth_th):
 
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  │")
                     # 垂直線
                     #
                     #   |    leftside_border
                     # ..+..  
                     #   |    leftside_border
                     #   |    leftside_border
-                    #
-                    if TreeView.is_same_between_ancestor_and_myself_as_avobe(
-                            curr_record=self._curr_record,
-                            prev_record=self._prev_record,
-                            depth_th=depth_th):
-                        print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  │")
-                        
-                        ws[f'{cn2}{row1_th}'].border = leftside_border_to_vertical
-                        ws[f'{cn2}{row2_th}'].border = leftside_border_to_vertical
-                        ws[f'{cn2}{row3_th}'].border = leftside_border_to_vertical
-                    
-                    else:
-                        print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
-                        pass
-
+                    #                        
+                    ws[f'{cn2}{row1_th}'].border = leftside_border_to_vertical
+                    ws[f'{cn2}{row2_th}'].border = leftside_border_to_vertical
+                    ws[f'{cn2}{row3_th}'].border = leftside_border_to_vertical
                     return
                 
-
-                # # １列目：親ノードから伸びてきた枝
-                # #
-                # #   .
-                # # --...
-                # #   .
-                # #
-                # # 前ラウンドにノードがあれば、接続線を引く
-                # #
-                # if TreeView.can_connect_to_parent(
-                #         curr_record=self._curr_record,
-                #         prev_record=self._prev_record,
-                #         depth_th=depth_th):
-                #     ws[f'{cn1}{row1_th}'].border = border_to_parent
-
+                else:
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
+                    pass
+                
 
                 # ２列目：エッジ・テキスト
                 ws[f'{cn2}{row1_th}'].value = nd.edge_text
@@ -286,7 +264,7 @@ class TreeDrawer():
                 #   .    None
                 #   .    None
                 #
-                kind = TreeView.get_kind_connect_to_child(
+                kind = TreeModel.get_kind_of_edge(
                         prev_record=self._prev_record,
                         curr_record=self._curr_record,
                         next_record=self._next_record,
@@ -340,8 +318,8 @@ class TreeDrawer():
                     #print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  nd.text が NaN のノードは無視")
                     return
 
-                # 先祖から自分までが同じノードテキストのレコードが続くなら省く
-                elif TreeView.is_same_between_ancestor_and_myself_as_avobe(
+                # 自件と前件を比較して、根から自ノードまで、ノードテキストが等しいか？
+                elif TreeModel.is_same_path_as_avobe(
                         curr_record=self._curr_record,
                         prev_record=self._prev_record,
                         depth_th=depth_th):
@@ -375,7 +353,8 @@ class TreeDrawer():
 
             # 第０層
             # ------
-            draw_node(depth_th=0, three_column_names=[None, None, 'C'], three_row_numbers=three_row_numbers)
+            depth_th = 0
+            draw_node(depth_th=depth_th, three_column_names=[None, None, 'C'], three_row_numbers=three_row_numbers)
 
 
             # 第１層
@@ -421,8 +400,7 @@ class TreeEraser():
     def erase_unnecessary_border_by_column(self, column_alphabet):
         """不要な境界線を消す"""
 
-        # DEBUG_POINT
-        # デバッグ時は、罫線を消すのではなく、灰色に変えると見やすいです
+        # DEBUG_TIPS: デバッグ時は、罫線を消すのではなく、灰色に変えると見やすいです
         if True:
             # 罫線無し
             striked_border = None
@@ -541,10 +519,10 @@ if __name__ == '__main__':
         # CSV読込
         tree_table = TreeTable.from_csv(file_path=CSV_FILE_PATH)
 
-        # CSV確認
-        print(f"""\
-tree_table.df:
-{tree_table.df}""")
+#         # CSV確認
+#         print(f"""\
+# tree_table.df:
+# {tree_table.df}""")
 
         tree_drawer = TreeDrawer(df=tree_table.df, wb=wb)
 
@@ -558,12 +536,9 @@ tree_table.df:
         tree_drawer.on_each_record(next_row_number=len(tree_table.df), next_record=TreeRecord.new_empty())
 
 
-        # DEBUG_POINT
+        # 要らない罫線を消す
+        # DEBUG_TIPS: このコードを不活性にして、必要な線は全部描かれていることを確認してください
         if True:
-            # 要らない罫線を消す
-            #
-            #   このコードを不活性にして、必要な線は全部描かれていることを確認してください
-            #
             tree_eraser = TreeEraser(wb=wb)
             tree_eraser.execute()
         else:

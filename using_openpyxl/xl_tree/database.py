@@ -1,5 +1,5 @@
 import pandas as pd
-from library import INDENT
+from xl_tree import INDENT
 
 
 ############
@@ -55,11 +55,11 @@ class TreeRecord():
         Parameters
         ----------
         no : int
-            1から始まる連番
+            1から始まる連番。数詞は葉
         node_list : list<TreeNode>
             固定長ノード０～４。
             第０層は根。
-            第５層以降欲しい場合は改造してください
+            TODO 第５層以降欲しい場合は改造してください
         """
         self._no = no
         self._node_list = node_list
