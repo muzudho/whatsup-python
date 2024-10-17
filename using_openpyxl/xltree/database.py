@@ -362,32 +362,27 @@ class TreeTable():
 
         df = self._df
 
-        # NOTE ノード数を増やしたいなら、ここを改造してください
-        for row_number,(
-                node0,
-                edge1, node1,
-                edge2, node2,
-                edge3, node3,
-                edge4, node4) in\
-                enumerate(zip(
-                    df['node0'],
-                    df['edge1'], df['node1'],
-                    df['edge2'], df['node2'],
-                    df['edge3'], df['node3'],
-                    df['edge4'], df['node4'])):
+        node_list = [None] * self._actual_length_of_nodes
+        edge_list = [None] * self._actual_length_of_nodes
 
+        # NOTE ノード数を増やしたいなら、ここを改造してください
+        for row_number in range(0, len(df)):
             # no はインデックス
             no = df.index[row_number]
+
+            node_list = []
+
+            # 根
+            node_list.append(TreeNode(edge_text=None, text=df.at[no, f'node0']))
+
+            # 中間～葉ノード
+            for node_th in range(1, self._actual_length_of_nodes):
+                node_list.append(TreeNode(edge_text=df.at[no, f'edge{node_th}'], text=df.at[no, f'node{node_th}']))
+
 
             # レコード作成
             record = TreeRecord(
                     no=no,
-                    # NOTE ノード数を増やしたいなら、ここを改造してください
-                    node_list=[
-                        TreeNode(edge_text=None, text=node0),
-                        TreeNode(edge_text=edge1, text=node1),
-                        TreeNode(edge_text=edge2, text=node2),
-                        TreeNode(edge_text=edge3, text=node3),
-                        TreeNode(edge_text=edge4, text=node4)])
+                    node_list=node_list)
 
             on_each(row_number, record)
