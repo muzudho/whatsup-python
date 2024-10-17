@@ -67,10 +67,10 @@ class TreeRecord():
 
 
     @staticmethod
-    def new_empty():
+    def new_empty(specified_length_of_nodes):
         return TreeRecord(
                 no=None,
-                node_list=[None, None, None, None, None]) # NOTE ノード数を増やしたいなら、ここを改造してください
+                node_list=[None] * specified_length_of_nodes)
 
 
     @property
@@ -365,7 +365,6 @@ class TreeTable():
         node_list = [None] * self._actual_length_of_nodes
         edge_list = [None] * self._actual_length_of_nodes
 
-        # NOTE ノード数を増やしたいなら、ここを改造してください
         for row_number in range(0, len(df)):
             # no はインデックス
             no = df.index[row_number]

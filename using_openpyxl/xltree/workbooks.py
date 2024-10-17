@@ -26,9 +26,9 @@ class TreeDrawer():
         self._ws = ws
         self._config = config
 
-        self._prev_record = TreeRecord.new_empty()
-        self._curr_record = TreeRecord.new_empty()
-        self._next_record = TreeRecord.new_empty()
+        self._prev_record = TreeRecord.new_empty(specified_length_of_nodes=self._tree_table.actual_length_of_nodes)
+        self._curr_record = TreeRecord.new_empty(specified_length_of_nodes=self._tree_table.actual_length_of_nodes)
+        self._next_record = TreeRecord.new_empty(specified_length_of_nodes=self._tree_table.actual_length_of_nodes)
 
 
     def render(self):
@@ -41,7 +41,7 @@ class TreeDrawer():
         self._tree_table.for_each(on_each=self._on_each_record)
 
         # 最終行の実行
-        self._on_each_record(next_row_number=len(self._tree_table.df), next_record=TreeRecord.new_empty())
+        self._on_each_record(next_row_number=len(self._tree_table.df), next_record=TreeRecord.new_empty(specified_length_of_nodes=self._tree_table.actual_length_of_nodes))
 
 
     def _forward_cursor(self, next_record):
