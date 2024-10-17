@@ -1,7 +1,7 @@
 import datetime
 import pandas as pd
 import openpyxl as xl
-from openpyxl.styles import PatternFill
+from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.borders import Border, Side
 
 from xltree.database import TreeNode, TreeRecord
@@ -97,23 +97,57 @@ class TreeDrawer():
         # ヘッダー行にする
         row_th = 1
 
+        # TODO 可変長ノード数への対応
         # NOTE データテーブルではなく、ビュー用途なので、テーブルとしての機能性は無視しています
         # A の代わりに {xl.utils.get_column_letter(1)} とも書ける
         ws[f'A{row_th}'] = 'No'
         # 第2列は空
-        ws[f'C{row_th}'] = '├─根─┤'
-        ws[f'D{row_th}'] = '├'
-        ws[f'E{row_th}'] = '─'
-        ws[f'F{row_th}'] = '第1層─┤'
-        ws[f'G{row_th}'] = '├'
-        ws[f'H{row_th}'] = '─'
-        ws[f'I{row_th}'] = '第2層─┤'
-        ws[f'J{row_th}'] = '├'
-        ws[f'K{row_th}'] = '─'
-        ws[f'L{row_th}'] = '第3層─┤'
-        ws[f'M{row_th}'] = '├'
-        ws[f'N{row_th}'] = '─'
-        ws[f'O{row_th}'] = '第4層─┤'
+        ws[f'C{row_th}'] = 'Root'
+        ws[f'F{row_th}'] = '1st'
+        ws[f'I{row_th}'] = '2nd'
+        ws[f'L{row_th}'] = '3rd'
+        ws[f'O{row_th}'] = '4th'
+
+
+        # 背景色
+        #
+        #   色の参考： 📖 [Excels 56 ColorIndex Colors](https://www.excelsupersite.com/what-are-the-56-colorindex-colors-in-excel/)
+        #
+        fgcolor_list = [
+            Font(color='EEEEEE'),
+            Font(color='111111'),
+        ]
+        bgcolor_list = [
+            PatternFill(patternType='solid', fgColor='333333'),
+            PatternFill(patternType='solid', fgColor='CCCCCC')]
+
+        ws[f'A{row_th}'].fill = bgcolor_list[1]
+        ws[f'A{row_th}'].font = fgcolor_list[1]
+        ws[f'B{row_th}'].fill = bgcolor_list[1]
+
+        ws[f'C{row_th}'].fill = bgcolor_list[0]
+        ws[f'C{row_th}'].font = fgcolor_list[0]
+
+        ws[f'D{row_th}'].fill = bgcolor_list[1]
+        ws[f'E{row_th}'].fill = bgcolor_list[1]
+        ws[f'F{row_th}'].fill = bgcolor_list[1]
+        ws[f'F{row_th}'].font = fgcolor_list[1]
+
+        ws[f'G{row_th}'].fill = bgcolor_list[0]
+        ws[f'H{row_th}'].fill = bgcolor_list[0]
+        ws[f'I{row_th}'].fill = bgcolor_list[0]
+        ws[f'I{row_th}'].font = fgcolor_list[0]
+
+        ws[f'J{row_th}'].fill = bgcolor_list[1]
+        ws[f'K{row_th}'].fill = bgcolor_list[1]
+        ws[f'L{row_th}'].fill = bgcolor_list[1]
+        ws[f'L{row_th}'].font = fgcolor_list[1]
+
+        ws[f'M{row_th}'].fill = bgcolor_list[0]
+        ws[f'N{row_th}'].fill = bgcolor_list[0]
+        ws[f'O{row_th}'].fill = bgcolor_list[0]
+        ws[f'O{row_th}'].font = fgcolor_list[0]
+
 
         # 第２行
         # ------
