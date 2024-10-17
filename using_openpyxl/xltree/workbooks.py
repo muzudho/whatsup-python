@@ -513,10 +513,12 @@ class TreeEraser():
                             print(f"[{datetime.datetime.now()}] Eraser {column_letter}{row_th} Memory underline ({row_th_of_last_underline} row) (Preview {row_th_of_prev_last_underline} row)")
                             shall_break = True
 
-                        # セルの左辺にも、下辺にも、太い罫線が引かれていなければ、仕切り直し
+                        # セルの左辺にも、下辺にも、太い罫線が引かれていなければ、罫線は尻切れトンボになっている。仕切り直し
                         else:
+                            row_th_of_prev_last_underline = row_th_of_last_underline
+                            row_th_of_last_underline = row_th
+                            print(f"[{datetime.datetime.now()}] Eraser {column_letter}{row_th} No border on the left and bottom. no connect line. Memory ({row_th_of_last_underline} row) (Preview {row_th_of_prev_last_underline} row)")
                             shall_break = True
-                            print(f"[{datetime.datetime.now()}] Eraser {column_letter}{row_th} No border on the left and bottom")
 
 
                 row_th += 1
