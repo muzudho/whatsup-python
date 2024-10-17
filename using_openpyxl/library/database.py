@@ -58,8 +58,8 @@ class TreeRecord():
             1から始まる連番
         node_list : list<TreeNode>
             固定長ノード０～４。
-            ０は根。
-            第５節以降欲しい場合は改造してください
+            第０層は根。
+            第５層以降欲しい場合は改造してください
         """
         self._no = no
         self._node_list = node_list
@@ -82,21 +82,21 @@ class TreeRecord():
         return len(self._node_list)
 
 
-    def node_at(self, node_th):
+    def node_at(self, depth_th):
         """
         Parameters
         ----------
         round_th : int
             th は forth や fifth の th。
             例：根なら０を指定してください。
-            例：第１節なら 1 を指定してください
+            例：第１層なら 1 を指定してください
         """
 
         # NOTE -1 を指定すると最後尾の要素になるが、固定長配列の最後尾の要素が、思っているような最後尾の要素とは限らない。うまくいかない
-        if node_th < 0:
-            raise ValueError(f'node_th に負数を設定しないでください。意図した動作はしません {node_th=}')
+        if depth_th < 0:
+            raise ValueError(f'depth_th に負数を設定しないでください。意図した動作はしません {depth_th=}')
 
-        return self._node_list[node_th]
+        return self._node_list[depth_th]
 
 
     def update(self, no=None, node_list=None):
@@ -129,14 +129,14 @@ class TreeRecord():
 
 
     def get_th_of_leaf_node(self):
-        """葉要素の節番号を取得。
+        """葉要素の層番号を取得。
         th は forth や fifth の th。
-        葉要素は、次の節がない要素"""
+        葉要素は、次の層がない要素"""
 
-        for node_th in range(0, len(self._node_list)):
-            nd = self._node_list[node_th]
+        for depth_th in range(0, len(self._node_list)):
+            nd = self._node_list[depth_th]
             if nd is None or nd.text is None:
-                return node_th
+                return depth_th
 
         return len(self._node_list)
 
