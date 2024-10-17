@@ -90,7 +90,7 @@ class Renderer():
             tree_eraser = TreeEraser(tree_table=tree_table, ws=wb[sheet_name])
             tree_eraser.render()
         else:
-            print(f"消しゴム　使用中止中")
+            print(f"Eraser disabled")
 
 
         # ワークブックの保存

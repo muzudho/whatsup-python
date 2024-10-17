@@ -61,7 +61,7 @@ Enter the path to the Excel workbook(.xlsx) file
                 wb_file_path=wb_file_path,
                 sheet_name=SHEET_NAME)
 
-        print(f"[{datetime.datetime.now()}] {wb_file_path} ファイルを確認してください")
+        print(f"[{datetime.datetime.now()}] Please look {wb_file_path}")
 
 
     except Exception as err:

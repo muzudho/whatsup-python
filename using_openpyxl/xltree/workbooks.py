@@ -158,7 +158,8 @@ class TreeDrawer():
         self._forward_cursor(next_record=next_record)
 
         if self._curr_record.no is None:
-            print(f"[{datetime.datetime.now()}] 第{self._curr_record.no}件 最初のレコードは先読みのため、空回しします")
+            # 最初のレコードは先読みのため、空回しします
+            print(f"[{datetime.datetime.now()}] Pencil {self._curr_record.no} record  first record read later")
             pass
 
 
@@ -240,7 +241,7 @@ class TreeDrawer():
                 nd = self._curr_record.node_at(depth_th=depth_th)
 
                 if nd is None or pd.isnull(nd.text):
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  空欄")
+                    print(f"[{datetime.datetime.now()}] Pencil(Edge) {self._curr_record.no} record > {nth(depth_th)} layer  Empty cell")
                     return
 
 
@@ -258,7 +259,7 @@ class TreeDrawer():
                         prev_record=self._prev_record,
                         depth_th=depth_th):
 
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  │")
+                    print(f"[{datetime.datetime.now()}] Pencil(Edge) {self._curr_record.no} record > {nth(depth_th)} layer  │")
                     # 垂直線
                     #
                     #   |    leftside_border
@@ -307,24 +308,24 @@ class TreeDrawer():
                 if kind == '─字':
                     ws[f'{cn1}{row1_th}'].border = border_to_parent_horizontal
                     ws[f'{cn2}{row1_th}'].border = under_border_to_child_horizontal
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  ─ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] Pencil(Edge) {self._curr_record.no} record > {nth(depth_th)} layer  ─ {nd.edge_text}")
                 
                 elif kind == '┬字':
                     ws[f'{cn1}{row1_th}'].border = border_to_parent_downward
                     ws[f'{cn2}{row1_th}'].border = under_border_to_child_downward
                     ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_downward
                     ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_downward
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  ┬ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] Pencil(Edge) {self._curr_record.no} record > {nth(depth_th)} layer  ┬ {nd.edge_text}")
 
                 elif kind == '├字':
                     ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_rightward
                     ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_rightward
                     ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_rightward
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  ├ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] Pencil(Edge) {self._curr_record.no} record > {nth(depth_th)} layer  ├ {nd.edge_text}")
 
                 elif kind == '└字':
                     ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_upward
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  └ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] Pencil(Edge) {self._curr_record.no} record > {nth(depth_th)} layer  └ {nd.edge_text}")
                 
                 else:
                     raise ValueError(f"{kind=}")
@@ -351,7 +352,7 @@ class TreeDrawer():
                         curr_record=self._curr_record,
                         prev_record=self._prev_record,
                         depth_th=depth_th):
-                    print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}件 第{depth_th}層  空欄")
+                    print(f"[{datetime.datetime.now()}] Pencil(Node) {self._curr_record.no} record > {nth(depth_th)} layer  Empty cell")
                     return
 
 
@@ -374,7 +375,7 @@ class TreeDrawer():
                 upside_node_border = Border(top=side, left=side, right=side)
                 downside_node_border = Border(bottom=side, left=side, right=side)
 
-                print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}件 第{depth_th}層  □ {nd.text}")
+                print(f"[{datetime.datetime.now()}] Pencil(Node) {self._curr_record.no} record > {nth(depth_th)} layer  □ {nd.text}")
                 ws[f'{cn3}{row1_th}'].value = nd.text
                 ws[f'{cn3}{row1_th}'].fill = node_bgcolor
                 ws[f'{cn3}{row1_th}'].border = upside_node_border
@@ -488,33 +489,34 @@ class TreeEraser():
                             row_th_of_prev_last_underline = row_th_of_last_underline
                             row_th_of_last_underline = row_th
                             currow_l_letter = True
-                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 左側と下側に罫線。 '└' 字か '├' 字のどちらかだ。アンダーラインが第何行か覚えておく（第{row_th_of_last_underline}行）（１つ前は第{row_th_of_prev_last_underline}行）")
+                            # 左側と下側に罫線。 '└' 字か '├' 字のどちらかだ。アンダーラインが第何行か覚えておく
+                            print(f"[{datetime.datetime.now()}] Eraser {column_letter}{row_th} Border on the left and bottom. '└' or '├'. Memory underline ({row_th_of_last_underline} row) (Preview {row_th_of_prev_last_underline} row)")
 
-                        # 次行へ読み進めていく
+                        # 左辺に罫線。次行へ読み進めていく
                         else:
-                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 左側に罫線")
+                            print(f"[{datetime.datetime.now()}] Eraser {column_letter}{row_th} Border on the left")
                             pass
 
                     # セルの左辺に太い罫線が引かれていない
                     else:
-                        # "└"字。［ラスト・シブリング］だ
+                        # "└"字。［ラスト・シブリング］なので、最後に見つけた左辺に罫線のないアンダーラインのことは忘れて仕切り直し
                         if prerow_l_letter:
                             row_th_of_prev_last_underline = -1
                             row_th_of_last_underline = -1
-                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 ラスト・シブリングなので、最後に見つけた左辺に罫線のないアンダーラインのことは忘れて仕切り直し")
+                            print(f"[{datetime.datetime.now()}] Eraser {column_letter}{row_th} Last sibling. Forget underline row")
                             shall_break = True
 
                         # セルの下辺に太い罫線が引かれていたら、つながっていない垂線だ。それが第何行か覚えておいて仕切り直す
                         elif border.bottom is not None and border.bottom.style == 'thick':
                             row_th_of_prev_last_underline = row_th_of_last_underline
                             row_th_of_last_underline = row_th
-                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 左辺に罫線のないアンダーラインが第何行か覚えておく（第{row_th_of_last_underline}行）（１つ前は第{row_th_of_prev_last_underline}行）")
+                            print(f"[{datetime.datetime.now()}] Eraser {column_letter}{row_th} Memory underline ({row_th_of_last_underline} row) (Preview {row_th_of_prev_last_underline} row)")
                             shall_break = True
 
                         # セルの左辺にも、下辺にも、太い罫線が引かれていなければ、仕切り直し
                         else:
                             shall_break = True
-                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 セルの左辺にも下辺にも罫線が引かれていなかったので、仕切り直し")
+                            print(f"[{datetime.datetime.now()}] Eraser {column_letter}{row_th} No border on the left and bottom")
 
 
                 row_th += 1
@@ -530,9 +532,9 @@ class TreeEraser():
             end_row_to_erase = row_th_of_last_underline
 
             if row_th_of_last_underline != -1 and 0 < start_row_to_erase and start_row_to_erase < end_row_to_erase:
-                print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列 消しゴムを掛けたいのは第{start_row_to_erase}～{end_row_to_erase - 1}行")
+                print(f"[{datetime.datetime.now()}] Eraser {column_letter}_ Erase {start_row_to_erase} to {end_row_to_erase - 1} row...")
                 for row_th_to_erase in range(start_row_to_erase, end_row_to_erase):
                     # 消すか、見え消しにするか切り替えられるようにしておく
                     ws[f'{column_letter}{row_th_to_erase}'].border = striked_border
 
-        print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 消しゴム掛け終わり（最終は第{ws.max_row}行）")
+        print(f"[{datetime.datetime.now()}] Eraser {column_letter}{row_th} finished (EOL {ws.max_row})")

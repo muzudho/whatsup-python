@@ -231,7 +231,8 @@ class TreeTable():
                     expected_node_th += 1
 
         actual_length_of_nodes = expected_node_th # 根ノード含む
-        print(f"[{datetime.datetime.now()}] テーブルにあるノード数 {actual_length_of_nodes}（根ノード含む）")
+        # テーブルにあるノード数
+        print(f"[{datetime.datetime.now()}] Table has {actual_length_of_nodes} nodes root node included")
 
         # テーブルに追加の設定
         clazz.setup_data_frame(df=df, specified_length_of_nodes=actual_length_of_nodes, shall_set_index=False)
