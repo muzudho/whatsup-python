@@ -1,3 +1,5 @@
+import re
+import datetime
 import pandas as pd
 from xl_tree import INDENT
 
@@ -148,42 +150,56 @@ class TreeTable():
     """樹形図データのテーブル"""
 
 
-    _dtype = {
-        # no はインデックス
+    # 列が可変長
+    _dtype = {}
 
-        'node0':'object',   # string 型は無いので object 型にする
-        'edge1':'object',
-        'node1':'object',
-        'edge2':'object',
-        'node2':'object',
-        'edge3':'object',
-        'node3':'object',
-        'edge4':'object',
-        'node4':'object'}   # NOTE ノード数を増やしたいなら、ここを改造してください
+    @classmethod
+    def create_dtype(clazz, specified_length_of_nodes):
+        # no はインデックスなので含めない
+        clazz._dtype = {}
+
+        # 根は必ず含む
+        clazz._dtype['node0'] = 'object'    # string 型は無いので object 型にする
+
+        for node_th in range(1, specified_length_of_nodes):
+            clazz._dtype[f'edge{node_th}'] = 'object'
+            clazz._dtype[f'node{node_th}'] = 'object'
+
+        return clazz._dtype
 
 
-    def __init__(self, df):
+    @staticmethod
+    def create_column_name_list(specified_length_of_nodes, include_index):
+        column_name_list = []
+
+        if include_index:
+            column_name_list.append('no')
+
+        # 根ノードは必ず追加
+        column_name_list.append('node0')
+
+        for node_th in range(1, specified_length_of_nodes):
+            column_name_list.append(f'edge{node_th}')
+            column_name_list.append(f'node{node_th}')
+
+        return column_name_list
+
+
+    def __init__(self, df, actual_length_of_nodes):
         self._df = df
+        self._actual_length_of_nodes = actual_length_of_nodes
 
 
     @classmethod
-    def new_empty_table(clazz):
-        df = pd.DataFrame(
-                columns=[
-                    # 'no' は後でインデックスに変換
-                    'no',
+    def new_empty_table(clazz, specified_length_of_nodes):
+        column_name_list = TreeTable.create_column_name_list(
+                specified_length_of_nodes=specified_length_of_nodes,
+                include_index=True) # 'no' は後でインデックスに変換
 
-                    'node0',
-                    'edge1',
-                    'node1',
-                    'edge2',
-                    'node2',
-                    'edge3',
-                    'node3',
-                    'edge4',
-                    'node4'])   # NOTE ノード数を増やしたいなら、ここを改造してください
-        clazz.setup_data_frame(df=df, shall_set_index=True)
-        return TreeTable(df=df)
+        df = pd.DataFrame(
+                columns=column_name_list)
+        clazz.setup_data_frame(df=df, specified_length_of_nodes=specified_length_of_nodes, shall_set_index=True)
+        return TreeTable(df=df, actual_length_of_nodes=specified_length_of_nodes)
 
 
     @classmethod
@@ -204,10 +220,24 @@ class TreeTable():
         """
         df = pd.read_csv(file_path, encoding="utf8", index_col=['no'])
 
-        # テーブルに追加の設定
-        clazz.setup_data_frame(df=df, shall_set_index=False)
+        # ノード数を数えたい
+        # 列名を左から見ていくと、 node0, node1, node2 といった形で 0から始まる昇順の連番が付いている "node数" 形式の列名が見つかるものとします
+        expected_node_th = 0
+        pattern = re.compile(r'node(\d+)')
+        for column_name in df.columns.values:
+            result = pattern.match(column_name)
+            if result:
+                actual_node_th = int(result.group(1))
+                if expected_node_th == actual_node_th:
+                    expected_node_th += 1
 
-        return TreeTable(df=df)
+        actual_length_of_nodes = expected_node_th # 根ノード含む
+        print(f"[{datetime.datetime.now()}] テーブルにあるノード数 {actual_length_of_nodes}（根ノード含む）")
+
+        # テーブルに追加の設定
+        clazz.setup_data_frame(df=df, specified_length_of_nodes=actual_length_of_nodes, shall_set_index=False)
+
+        return TreeTable(df=df, actual_length_of_nodes=actual_length_of_nodes)
 
 
     @property
@@ -215,8 +245,14 @@ class TreeTable():
         return self._df
 
 
+    @property
+    def actual_length_of_nodes(self):
+        """CSV読取時に数えたノード数"""
+        return self._actual_length_of_nodes
+
+
     @classmethod
-    def setup_data_frame(clazz, df, shall_set_index):
+    def setup_data_frame(clazz, df, specified_length_of_nodes, shall_set_index):
         """データフレームの設定"""
 
         if shall_set_index:
@@ -225,7 +261,9 @@ class TreeTable():
                     inplace=True)   # NOTE インデックスを指定したデータフレームを戻り値として返すのではなく、このインスタンス自身を更新します
 
         # データ型の設定
-        df.astype(clazz._dtype)
+        dtype = clazz.create_dtype(specified_length_of_nodes=specified_length_of_nodes)
+        print(f"setup_data_frame {dtype=}")
+        df.astype(dtype)
 
 
     def upsert_record(self, welcome_record):
@@ -259,42 +297,33 @@ class TreeTable():
 
         else:
             # 更新の有無判定
-            # no はインデックス
-            shall_record_change =\
-                self._df['node0'][index] != welcome_record.node_at(0).text or\
-                \
-                self._df['edge1'][index] != welcome_record.node_at(1).edge_text or\
-                self._df['node1'][index] != welcome_record.node_at(1).node or\
-                \
-                self._df['edge2'][index] != welcome_record.node_at(2).edge_text or\
-                self._df['node2'][index] != welcome_record.node_at(2).node or\
-                \
-                self._df['edge3'][index] != welcome_record.node_at(3).edge_text or\
-                self._df['node3'][index] != welcome_record.node_at(3).node or\
-                \
-                self._df['edge4'][index] != welcome_record.node_at(4).edge_text or\
-                self._df['node4'][index] != welcome_record.node_at(4).node
-            # NOTE ノード数を増やしたいなら、ここを改造してください
+            shall_record_change = True
+            # no はインデックスなので含めない
+
+            # 根は必ず含める
+            if self._df['node0'][index] != welcome_record.node_at(0).text:
+                shall_record_change = False
+            
+            for node_th in range(1, self._actual_length_of_nodes):
+                if self._df[f'node{node_th}'][index] != welcome_record.node_at(node_th).text:
+                    shall_record_change = False
+                    break
 
 
         # 行の挿入または更新
         if shall_record_change:
-            self._df.loc[index] = {
-                # no はインデックス
-                'node0': welcome_record.node_at(0).text,
 
-                'edge1': welcome_record.node_at(1).edge_text,
-                'node1': welcome_record.node_at(1).text,
+            # no はインデックスなので含めない
+            dictionary = {}
 
-                'edge2': welcome_record.node_at(2).edge_text,
-                'node2': welcome_record.node_at(2).text,
+            # 根は必ず含める
+            dictionary['node0'] = welcome_record.node_at(0).text
 
-                'edge3': welcome_record.node_at(3).edge_text,
-                'node3': welcome_record.node_at(3).text,
+            for node_th in range(1, self.actual_length_of_nodes):
+                dictionary[f'edge{node_th}'] = welcome_record.node_at(node_th).edge_text
+                dictionary[f'node{node_th}'] = welcome_record.node_at(node_th).text
 
-                'edge4': welcome_record.node_at(4).edge_text,
-                'node4': welcome_record.node_at(4).text}
-                # NOTE ノード数を増やしたいなら、ここを改造してください
+            self._df.loc[index] = dictionary
 
 
         if is_new_index:
@@ -315,16 +344,13 @@ class TreeTable():
             CSVファイルパス
         """
 
+        column_name_list = TreeTable.create_column_name_list(
+                specified_length_of_nodes=self.actual_length_of_nodes,
+                include_index=False) # no はインデックスなので含めない
+
         self._df.to_csv(
                 csv_file_path,
-                # no はインデックス
-                columns=[
-                    'node0',
-                    'edge1', 'node1',
-                    'edge2', 'node2',
-                    'edge3', 'node3',
-                    'edge4', 'node4'])
-                # NOTE ノード数を増やしたいなら、ここを改造してください
+                columns=column_name_list)
 
 
     def for_each(self, on_each):

@@ -349,39 +349,44 @@ class TreeDrawer():
             # 第０層
             # ------
             depth_th = 0
-            draw_node(depth_th=depth_th, three_column_names=[None, None, 'C'], three_row_numbers=three_row_numbers)
+            if depth_th < self._tree_table.actual_length_of_nodes:
+                draw_node(depth_th=depth_th, three_column_names=[None, None, 'C'], three_row_numbers=three_row_numbers)
 
 
             # 第１層
             # ------
             depth_th = 1
-            three_column_names=['D', 'E', 'F']
-            draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
-            draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
+            if depth_th < self._tree_table.actual_length_of_nodes:
+                three_column_names=['D', 'E', 'F']
+                draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
+                draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
 
 
             # 第２層
             # ------
             depth_th = 2
-            three_column_names=['G', 'H', 'I']
-            draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
-            draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
+            if depth_th < self._tree_table.actual_length_of_nodes:
+                three_column_names=['G', 'H', 'I']
+                draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
+                draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
 
 
             # 第３層
             # ------
             depth_th = 3
-            three_column_names=['J', 'K', 'L']
-            draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
-            draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
+            if depth_th < self._tree_table.actual_length_of_nodes:
+                three_column_names=['J', 'K', 'L']
+                draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
+                draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
 
 
             # 第４層
             # ------
             depth_th = 4
-            three_column_names=['M', 'N', 'O']
-            draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
-            draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
+            if depth_th < self._tree_table.actual_length_of_nodes:
+                three_column_names=['M', 'N', 'O']
+                draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
+                draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
 
 
 class TreeEraser():
