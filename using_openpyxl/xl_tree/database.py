@@ -59,7 +59,7 @@ class TreeRecord():
         node_list : list<TreeNode>
             固定長ノード０～４。
             第０層は根。
-            TODO 第５層以降欲しい場合は改造してください
+            NOTE ノード数を増やしたいなら、ここを改造してください
         """
         self._no = no
         self._node_list = node_list
@@ -69,7 +69,7 @@ class TreeRecord():
     def new_empty():
         return TreeRecord(
                 no=None,
-                node_list=[None, None, None, None, None])
+                node_list=[None, None, None, None, None]) # NOTE ノード数を増やしたいなら、ここを改造してください
 
 
     @property
@@ -159,7 +159,7 @@ class TreeTable():
         'edge3':'object',
         'node3':'object',
         'edge4':'object',
-        'node4':'object'}
+        'node4':'object'}   # NOTE ノード数を増やしたいなら、ここを改造してください
 
 
     def __init__(self, df):
@@ -181,7 +181,7 @@ class TreeTable():
                     'edge3',
                     'node3',
                     'edge4',
-                    'node4'])
+                    'node4'])   # NOTE ノード数を増やしたいなら、ここを改造してください
         clazz.setup_data_frame(df=df, shall_set_index=True)
         return TreeTable(df=df)
 
@@ -274,6 +274,7 @@ class TreeTable():
                 \
                 self._df['edge4'][index] != welcome_record.node_at(4).edge_text or\
                 self._df['node4'][index] != welcome_record.node_at(4).node
+            # NOTE ノード数を増やしたいなら、ここを改造してください
 
 
         # 行の挿入または更新
@@ -293,6 +294,8 @@ class TreeTable():
 
                 'edge4': welcome_record.node_at(4).edge_text,
                 'node4': welcome_record.node_at(4).text}
+                # NOTE ノード数を増やしたいなら、ここを改造してください
+
 
         if is_new_index:
             # NOTE ソートをしておかないと、インデックスのパフォーマンスが機能しない
@@ -321,6 +324,7 @@ class TreeTable():
                     'edge2', 'node2',
                     'edge3', 'node3',
                     'edge4', 'node4'])
+                # NOTE ノード数を増やしたいなら、ここを改造してください
 
 
     def for_each(self, on_each):
@@ -333,6 +337,7 @@ class TreeTable():
 
         df = self._df
 
+        # NOTE ノード数を増やしたいなら、ここを改造してください
         for row_number,(
                 node0,
                 edge1, node1,
@@ -352,7 +357,7 @@ class TreeTable():
             # レコード作成
             record = TreeRecord(
                     no=no,
-                    # TODO 今のところ固定長サイズ
+                    # NOTE ノード数を増やしたいなら、ここを改造してください
                     node_list=[
                         TreeNode(edge_text=None, text=node0),
                         TreeNode(edge_text=edge1, text=node1),

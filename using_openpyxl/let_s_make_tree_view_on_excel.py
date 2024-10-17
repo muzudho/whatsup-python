@@ -55,7 +55,10 @@ if __name__ == '__main__':
 
 
     except Exception as err:
-        print(f"[unexpected error] {err=}  {type(err)=}")
+        print(f"""\
+おお、残念！　例外が投げられてしまった！
+{type(err)=}  {err=}
 
-        # スタックトレース表示
-        print(traceback.format_exc())
+以下はスタックトレース表示じゃ。
+{traceback.format_exc()}
+""")

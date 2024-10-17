@@ -4,7 +4,7 @@ import openpyxl as xl
 from openpyxl.styles import PatternFill
 from openpyxl.styles.borders import Border, Side
 
-from xl_tree.database import TreeNode, TreeRecord, TreeTable
+from xl_tree.database import TreeNode, TreeRecord
 from xl_tree.models import TreeModel
 
 
@@ -33,16 +33,16 @@ class TreeDrawer():
         """描画"""
 
         # 対象シートへ列ヘッダー書出し
-        self.on_header()
+        self._on_header()
 
         # 対象シートへの各行書出し
-        self._tree_table.for_each(on_each=self.on_each_record)
+        self._tree_table.for_each(on_each=self._on_each_record)
 
         # 最終行の実行
-        self.on_each_record(next_row_number=len(self._tree_table.df), next_record=TreeRecord.new_empty())
+        self._on_each_record(next_row_number=len(self._tree_table.df), next_record=TreeRecord.new_empty())
 
 
-    def forward_cursor(self, next_record):
+    def _forward_cursor(self, next_record):
         """送り出し
 
         Parameters
@@ -55,7 +55,7 @@ class TreeDrawer():
         self._next_record = next_record
 
 
-    def on_header(self):
+    def _on_header(self):
 
         # 変数名の短縮
         ws = self._ws
@@ -116,14 +116,14 @@ class TreeDrawer():
         row_th = 2
 
 
-    def on_each_record(self, next_row_number, next_record):
+    def _on_each_record(self, next_row_number, next_record):
         """先読みで最初の１回を空振りさせるので、２件目から本処理です"""
 
         # 事前送り出し
-        self.forward_cursor(next_record=next_record)
+        self._forward_cursor(next_record=next_record)
 
         if self._curr_record.no is None:
-            print(f"[{datetime.datetime.now()}] 第{self._curr_record.no}葉 現在レコードのnoがナンだから無視（先読みのため、初回は空回し）")
+            print(f"[{datetime.datetime.now()}] 第{self._curr_record.no}葉 最初のレコードは先読みのため、空回しします")
             pass
 
 
@@ -135,10 +135,12 @@ class TreeDrawer():
             # ３行目～６行目
             # --------------
             # データは３行目から、１かたまり３行を使って描画する
+            HEADER_HEIGHT = 3
+            RECORD_HEIGHT = 3
             curr_row_number = next_row_number - 1
-            row1_th = curr_row_number * 3 + 3
-            row2_th = curr_row_number * 3 + 3 + 1
-            row3_th = curr_row_number * 3 + 3 + 2
+            row1_th = curr_row_number * RECORD_HEIGHT + HEADER_HEIGHT
+            row2_th = curr_row_number * RECORD_HEIGHT + HEADER_HEIGHT + 1
+            row3_th = curr_row_number * RECORD_HEIGHT + HEADER_HEIGHT + 2
             three_row_numbers = [row1_th, row2_th, row3_th]
 
             # 行の高さ設定
@@ -159,11 +161,10 @@ class TreeDrawer():
                     第何層。根層は 0
                 """
 
-                # 色の参考： 📖 [Excels 56 ColorIndex Colors](https://www.excelsupersite.com/what-are-the-56-colorindex-colors-in-excel/)
-
                 # 罫線
                 #
                 #   style に入るもの： 'dashDot', 'dashDotDot', 'double', 'hair', 'dotted', 'mediumDashDotDot', 'dashed', 'mediumDashed', 'slantDashDot', 'thick', 'thin', 'medium', 'mediumDashDot'
+                #   色の参考： 📖 [Excels 56 ColorIndex Colors](https://www.excelsupersite.com/what-are-the-56-colorindex-colors-in-excel/)
                 #
                 BLACK = '000000'
                 side = Side(style='thick', color=BLACK)
@@ -175,14 +176,12 @@ class TreeDrawer():
                     green_side = Side(style='thick', color=BLACK)
                     blue_side = Side(style='thick', color=BLACK)
                     cyan_side = Side(style='thick', color=BLACK)
-                    #magenta_side = Side(style='thick', color=BLACK)
                 else:
                     red_side = Side(style='thick', color='FF0000')
                     orange_side = Side(style='thick', color='FFCC00')
                     green_side = Side(style='thick', color='00FF00')
                     blue_side = Side(style='thick', color='0000FF')
                     cyan_side = Side(style='thick', color='00FFFF')
-                    #magenta_side = Side(style='thick', color='FF00FF')
 
                 # ─字  赤
                 border_to_parent_horizontal = Border(bottom=red_side)
@@ -200,15 +199,9 @@ class TreeDrawer():
                 l_letter_border_to_child_upward = Border(left=orange_side, bottom=orange_side)
 
 
-                prerow_nd = self._prev_record.node_at(depth_th=depth_th)
                 nd = self._curr_record.node_at(depth_th=depth_th)
 
-                if nd is None:
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  nd がナンのノードは無視")
-                    return
-
-                # nd.text が NaN のノードは無視
-                elif pd.isnull(nd.text):
+                if nd is None or pd.isnull(nd.text):
                     print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
                     return
 
@@ -239,14 +232,6 @@ class TreeDrawer():
                     ws[f'{cn2}{row2_th}'].border = leftside_border_to_vertical
                     ws[f'{cn2}{row3_th}'].border = leftside_border_to_vertical
                     return
-                
-                else:
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
-                    pass
-                
-
-                # ２列目：エッジ・テキスト
-                ws[f'{cn2}{row1_th}'].value = nd.edge_text
 
 
                 # 子ノードへの接続は４種類の線がある
@@ -305,6 +290,10 @@ class TreeDrawer():
                 
                 else:
                     raise ValueError(f"{kind=}")
+                
+
+                # ２列目：エッジ・テキスト
+                ws[f'{cn2}{row1_th}'].value = nd.edge_text
 
 
             def draw_node(depth_th, three_column_names, three_row_numbers):
@@ -318,23 +307,13 @@ class TreeDrawer():
                     第何層。根層は 0
                 """
 
-                prerow_nd = self._prev_record.node_at(depth_th=depth_th)
                 nd = self._curr_record.node_at(depth_th=depth_th)
 
-                if nd is None:
-                    #print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  nd がナンのノードは無視")
-                    return
-
-                elif pd.isnull(nd.text):
-                    #print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  nd.text が NaN のノードは無視")
-                    return
-
-                # 自件と前件を比較して、根から自ノードまで、ノードテキストが等しいか？
-                elif TreeModel.is_same_path_as_avobe(
+                if nd is None or pd.isnull(nd.text) or TreeModel.is_same_path_as_avobe(
                         curr_record=self._curr_record,
                         prev_record=self._prev_record,
                         depth_th=depth_th):
-                    #print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  同じディレクトリーは描画を省く")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
                     return
 
 
@@ -343,10 +322,13 @@ class TreeDrawer():
                 row2_th = three_row_numbers[1]
                 row3_th = three_row_numbers[2]
 
-                # 色の参考： 📖 [Excels 56 ColorIndex Colors](https://www.excelsupersite.com/what-are-the-56-colorindex-colors-in-excel/)
+                # 背景色
+                #
+                #   色の参考： 📖 [Excels 56 ColorIndex Colors](https://www.excelsupersite.com/what-are-the-56-colorindex-colors-in-excel/)
+                #
                 node_bgcolor = PatternFill(patternType='solid', fgColor='FFFFCC')
 
-                # 罫線
+                # 罫線、背景色
                 #
                 #   style に入るもの： 'dashDot', 'dashDotDot', 'double', 'hair', 'dotted', 'mediumDashDotDot', 'dashed', 'mediumDashed', 'slantDashDot', 'thick', 'thin', 'medium', 'mediumDashDot'
                 #
@@ -361,6 +343,8 @@ class TreeDrawer():
                 ws[f'{cn3}{row2_th}'].fill = node_bgcolor
                 ws[f'{cn3}{row2_th}'].border = downside_node_border
 
+
+            # NOTE ノード数を増やしたいなら、ここを改造してください
 
             # 第０層
             # ------
@@ -415,7 +399,17 @@ class TreeEraser():
         self._ws = ws
 
 
-    def erase_unnecessary_border_by_column(self, column_alphabet):
+    def render(self):
+        """描画"""
+
+        # NOTE ノード数を増やしたいなら、ここを改造してください
+        # 指定の列の左側の垂直の罫線を見ていく
+        column_alphabet_list = ['E', 'H', 'K', 'N']
+        for column_alphabet in column_alphabet_list:
+            self._erase_unnecessary_border_by_column(column_alphabet=column_alphabet)
+
+
+    def _erase_unnecessary_border_by_column(self, column_alphabet):
         """不要な境界線を消す"""
 
         # DEBUG_TIPS: デバッグ時は、罫線を消すのではなく、灰色に変えると見やすいです
@@ -458,8 +452,6 @@ class TreeEraser():
                 #
                 border = ws[f'{column_alphabet}{row_th}'].border
                 if border is not None:
-                    #print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 境界線有り {border=}")
-
                     # セルの左辺に太い罫線が引かれており...
                     if border.left is not None and border.left.style == 'thick':
                         # セルの下辺にも太い罫線が引かれていれば、［ラスト・シブリング］だ
@@ -496,7 +488,6 @@ class TreeEraser():
             # 消しゴムを掛ける
             start_row_to_erase = row_th_of_prev_last_underline + 1
             end_row_to_erase = row_th_of_last_underline
-            #print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 仕切り直し {row_th_of_last_underline=} {start_row_to_erase=} {end_row_to_erase=}")
 
             if row_th_of_last_underline != -1 and 0 < start_row_to_erase and start_row_to_erase < end_row_to_erase:
                 print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列 消しゴムを掛けたいのは第{start_row_to_erase}～{end_row_to_erase - 1}行")
@@ -505,13 +496,3 @@ class TreeEraser():
                     ws[f'{column_alphabet}{row_th_to_erase}'].border = striked_border
 
         print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 消しゴム掛け終わり（最終は第{ws.max_row}行）")
-
-
-    def render(self):
-        """描画"""
-
-        # TODO 可変長に対応したい
-        # 指定の列の左側の垂直の罫線を見ていく
-        column_alphabet_list = ['E', 'H', 'K', 'N']
-        for column_alphabet in column_alphabet_list:
-            self.erase_unnecessary_border_by_column(column_alphabet=column_alphabet)
