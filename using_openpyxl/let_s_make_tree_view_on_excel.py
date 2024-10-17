@@ -154,17 +154,26 @@ class TreeDrawer():
                 #
                 #   style に入るもの： 'dashDot', 'dashDotDot', 'double', 'hair', 'dotted', 'mediumDashDotDot', 'dashed', 'mediumDashed', 'slantDashDot', 'thick', 'thin', 'medium', 'mediumDashDot'
                 #
-                side = Side(style='thick', color='000000')
-                # デバッグ用に色を付けておく
-                #
-                #   黄色は白字の上で見にくいのでやめとく
-                #
-                red_side = Side(style='thick', color='FF0000')      # FF0000
-                orange_side = Side(style='thick', color='FFCC00')   # FFCC00
-                green_side = Side(style='thick', color='00FF00')    # 00FF00
-                blue_side = Side(style='thick', color='0000FF')     # 0000FF
-                cyan_side = Side(style='thick', color='00FFFF')     # 00FFFF
-                magenta_side = Side(style='thick', color='FF00FF')  # FF00FF
+                BLACK = '000000'
+                side = Side(style='thick', color=BLACK)
+
+                # DEBUG_POINT
+                # 罫線に色を付けると、デバッグしやすいです
+                if True:
+                    red_side = Side(style='thick', color=BLACK)
+                    orange_side = Side(style='thick', color=BLACK)
+                    green_side = Side(style='thick', color=BLACK)
+                    blue_side = Side(style='thick', color=BLACK)
+                    cyan_side = Side(style='thick', color=BLACK)
+                    magenta_side = Side(style='thick', color=BLACK)
+                else:
+                    red_side = Side(style='thick', color='FF0000')
+                    orange_side = Side(style='thick', color='FFCC00')
+                    green_side = Side(style='thick', color='00FF00')
+                    blue_side = Side(style='thick', color='0000FF')
+                    cyan_side = Side(style='thick', color='00FFFF')
+                    magenta_side = Side(style='thick', color='FF00FF')
+
                 # ─字接続は赤
                 border_to_parent_horizontal = Border(bottom=red_side)
                 under_border_to_child_horizontal = Border(bottom=red_side)
@@ -412,16 +421,22 @@ class TreeEraser():
     def erase_unnecessary_border_by_column(self, column_alphabet):
         """不要な境界線を消す"""
 
-        # 色の参考： 📖 [Excels 56 ColorIndex Colors](https://www.excelsupersite.com/what-are-the-56-colorindex-colors-in-excel/)
-        #
-        # 罫線
-        #
-        #   style に入るもの： 'dashDot', 'dashDotDot', 'double', 'hair', 'dotted', 'mediumDashDotDot', 'dashed', 'mediumDashed', 'slantDashDot', 'thick', 'thin', 'medium', 'mediumDashDot'
-        #
-        # 見え消し用（デバッグに使う）
-        striked_side = Side(style='thick', color='DDDDDD')
-        # 見え消し用の罫線
-        striked_border = Border(left=striked_side)
+        # DEBUG_POINT
+        # デバッグ時は、罫線を消すのではなく、灰色に変えると見やすいです
+        if True:
+            # 罫線無し
+            striked_border = None
+        else:
+            # 色の参考： 📖 [Excels 56 ColorIndex Colors](https://www.excelsupersite.com/what-are-the-56-colorindex-colors-in-excel/)
+            #
+            # 罫線
+            #
+            #   style に入るもの： 'dashDot', 'dashDotDot', 'double', 'hair', 'dotted', 'mediumDashDotDot', 'dashed', 'mediumDashed', 'slantDashDot', 'thick', 'thin', 'medium', 'mediumDashDot'
+            #
+            # 見え消し用（デバッグに使う）
+            striked_side = Side(style='thick', color='DDDDDD')
+            # 見え消し用の罫線
+            striked_border = Border(left=striked_side)
 
 
         # 変数名の短縮
@@ -450,9 +465,19 @@ class TreeEraser():
                 if border is not None:
                     #print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 境界線有り {border=}")
 
-                    # セルの左辺に太い罫線が引かれていれば、次行へ読み進めていく
+                    # セルの左辺に太い罫線が引かれており...
                     if border.left is not None and border.left.style == 'thick':
-                        print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 左側に罫線")
+                        # セルの下辺にも太い罫線が引かれていれば、［ラスト・シブリング］だ
+                        if border.bottom is not None and border.bottom.style == 'thick':
+                            row_th_of_prev_last_underline = -1
+                            row_th_of_last_underline = -1
+                            print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 ラスト・シブリングなので、最後に見つけた左辺に罫線のないアンダーラインのことは忘れて仕切り直し")
+                            shall_break = True
+
+                        # 次行へ読み進めていく
+                        else:
+                            print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 左側に罫線")
+                            pass
 
                     # セルの左辺に太い罫線が引かれておらず、セルの下辺に太い罫線が引かれていたら、つながっていない垂線だ。それが第何行か覚えておいて仕切り直す
                     elif border.bottom is not None and border.bottom.style == 'thick':
@@ -476,13 +501,12 @@ class TreeEraser():
             # 消しゴムを掛ける
             start_row_to_erase = row_th_of_prev_last_underline + 1
             end_row_to_erase = row_th_of_last_underline
-            print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 仕切り直し {row_th_of_last_underline=} {start_row_to_erase=} {end_row_to_erase=}")
+            #print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 仕切り直し {row_th_of_last_underline=} {start_row_to_erase=} {end_row_to_erase=}")
 
             if row_th_of_last_underline != -1 and 0 < start_row_to_erase and start_row_to_erase < end_row_to_erase:
                 print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列 消しゴムを掛けたいのは第{start_row_to_erase}～{end_row_to_erase - 1}行")
                 for row_th_to_erase in range(start_row_to_erase, end_row_to_erase):
-                    #ws[f'{column_alphabet}{row_th_to_erase}'].border = None
-                    # 見え消しにする場合
+                    # 消すか、見え消しにするか切り替えられるようにしておく
                     ws[f'{column_alphabet}{row_th_to_erase}'].border = striked_border
 
         print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 消しゴム掛け終わり（最終は第{ws.max_row}行）")
@@ -534,13 +558,16 @@ tree_table.df:
         tree_drawer.on_each_record(next_row_number=len(tree_table.df), next_record=TreeRecord.new_empty())
 
 
-        # 要らない罫線を消す
-        #
-        #   NOTE このコードをコメントアウトして、必要な線は全部描かれていることを確認してください
-        #
-        print(f"消しゴム　コメントアウト中")
-        # tree_eraser = TreeEraser(wb=wb)
-        # tree_eraser.execute()
+        # DEBUG_POINT
+        if True:
+            # 要らない罫線を消す
+            #
+            #   このコードを不活性にして、必要な線は全部描かれていることを確認してください
+            #
+            tree_eraser = TreeEraser(wb=wb)
+            tree_eraser.execute()
+        else:
+            print(f"消しゴム　使用中止中")
 
 
         # ワークブックの保存
