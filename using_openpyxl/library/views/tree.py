@@ -139,7 +139,7 @@ class TreeView():
 
         node = curr_record.node_at(depth_th=depth_th)
         prenode = curr_record.node_at(depth_th=predepth_th)
-        print(f"""[{datetime.datetime.now()}] 水平線 第{depth_th}層：{node.text=}  第{predepth_th}層：{prenode.text=}""")
+        #print(f"""[{datetime.datetime.now()}] 水平線 第{depth_th}層：{node.text=}  第{predepth_th}層：{prenode.text=}""")
 #         print(f"""\
 # predepth_thde:
 # {predepth_thde.stringify_dump('')}
