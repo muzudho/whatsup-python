@@ -4,7 +4,7 @@ import openpyxl as xl
 from openpyxl.styles import PatternFill
 from openpyxl.styles.borders import Border, Side
 
-from xl_tree.database import TreeNode, TreeRecord
+from xl_tree.database import TreeNode, TreeRecord, TreeTable
 from xl_tree.models import TreeModel
 
 
@@ -12,12 +12,34 @@ class TreeDrawer():
     """エクセルで罫線などを駆使して、樹形図を描画します"""
 
 
-    def __init__(self, df, wb):
-        self._df = df
-        self._wb = wb
+    def __init__(self, tree_table, ws):
+        """初期化
+        
+        Parameters
+        ----------
+        df : DataFrame
+            データフレーム
+        ws : openpyxl.Worksheet
+            ワークシート
+        """
+        self._tree_table = tree_table
+        self._ws = ws
         self._prev_record = TreeRecord.new_empty()
         self._curr_record = TreeRecord.new_empty()
         self._next_record = TreeRecord.new_empty()
+
+
+    def render(self):
+        """描画"""
+
+        # 対象シートへ列ヘッダー書出し
+        self.on_header()
+
+        # 対象シートへの各行書出し
+        self._tree_table.for_each(on_each=self.on_each_record)
+
+        # 最終行の実行
+        self.on_each_record(next_row_number=len(self._tree_table.df), next_record=TreeRecord.new_empty())
 
 
     def forward_cursor(self, next_record):
@@ -36,7 +58,7 @@ class TreeDrawer():
     def on_header(self):
 
         # 変数名の短縮
-        ws = self._wb['Tree']
+        ws = self._ws
 
 
         # 列の幅設定
@@ -107,7 +129,7 @@ class TreeDrawer():
 
         else:
             # 変数名短縮
-            ws = self._wb['Tree']
+            ws = self._ws
 
 
             # ３行目～６行目
@@ -382,8 +404,15 @@ class TreeEraser():
     """要らない罫線を消す"""
 
 
-    def __init__(self, wb):
-        self._wb = wb
+    def __init__(self, ws):
+        """初期化
+        
+        Parameters
+        ----------
+        ws : openpyxl.Worksheet
+            ワークシート
+        """
+        self._ws = ws
 
 
     def erase_unnecessary_border_by_column(self, column_alphabet):
@@ -394,11 +423,10 @@ class TreeEraser():
             # 罫線無し
             striked_border = None
         else:
-            # 色の参考： 📖 [Excels 56 ColorIndex Colors](https://www.excelsupersite.com/what-are-the-56-colorindex-colors-in-excel/)
-            #
             # 罫線
             #
             #   style に入るもの： 'dashDot', 'dashDotDot', 'double', 'hair', 'dotted', 'mediumDashDotDot', 'dashed', 'mediumDashed', 'slantDashDot', 'thick', 'thin', 'medium', 'mediumDashDot'
+            #   色の参考： 📖 [Excels 56 ColorIndex Colors](https://www.excelsupersite.com/what-are-the-56-colorindex-colors-in-excel/)
             #
             # 見え消し用（デバッグに使う）
             striked_side = Side(style='thick', color='DDDDDD')
@@ -407,7 +435,7 @@ class TreeEraser():
 
 
         # 変数名の短縮
-        ws = self._wb['Tree']
+        ws = self._ws
 
 
         # 最後に見つけた、セルの左辺に罫線がなく、下辺に太い罫線がある行をリセット
@@ -479,11 +507,11 @@ class TreeEraser():
         print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 消しゴム掛け終わり（最終は第{ws.max_row}行）")
 
 
-    def execute(self):
+    def render(self):
+        """描画"""
 
         # TODO 可変長に対応したい
         # 指定の列の左側の垂直の罫線を見ていく
-        self.erase_unnecessary_border_by_column(column_alphabet='E')
-        self.erase_unnecessary_border_by_column(column_alphabet='H')
-        self.erase_unnecessary_border_by_column(column_alphabet='K')
-        self.erase_unnecessary_border_by_column(column_alphabet='N')
+        column_alphabet_list = ['E', 'H', 'K', 'N']
+        for column_alphabet in column_alphabet_list:
+            self.erase_unnecessary_border_by_column(column_alphabet=column_alphabet)

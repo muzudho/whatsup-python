@@ -7,17 +7,14 @@
 
 import traceback
 import datetime
-import pandas as pd
 import openpyxl as xl
-from openpyxl.styles import PatternFill, Font
-from openpyxl.styles.borders import Border, Side
 
-from xl_tree.database import TreeNode, TreeRecord, TreeTable
-from xl_tree.models import TreeModel
+from xl_tree.database import TreeRecord, TreeTable
 from xl_tree.workbooks import TreeDrawer, TreeEraser
 
 CSV_FILE_PATH = '../data/tree_shiritori.csv'
 WB_FILE_PATH = '../temp/tree.xlsx'
+SHEET_NAME = 'Tree'
 
 
 ########################################
@@ -30,8 +27,8 @@ if __name__ == '__main__':
         # ワークブックを生成
         wb = xl.Workbook()
 
-        # Tree シートを作成
-        wb.create_sheet('Tree')
+        # シートを作成
+        wb.create_sheet(SHEET_NAME)
 
         # 既存の Sheet シートを削除
         wb.remove(wb['Sheet'])
@@ -39,28 +36,16 @@ if __name__ == '__main__':
         # CSV読込
         tree_table = TreeTable.from_csv(file_path=CSV_FILE_PATH)
 
-#         # CSV確認
-#         print(f"""\
-# tree_table.df:
-# {tree_table.df}""")
-
-        tree_drawer = TreeDrawer(df=tree_table.df, wb=wb)
-
-        # GTWB の Sheet シートへのヘッダー書出し
-        tree_drawer.on_header()
-
-        # GTWB の Sheet シートへの各行書出し
-        tree_table.for_each(on_each=tree_drawer.on_each_record)
-
-        # 最終行の実行
-        tree_drawer.on_each_record(next_row_number=len(tree_table.df), next_record=TreeRecord.new_empty())
+        # ツリードロワーを用意、描画（都合上、要らない罫線が付いています）
+        tree_drawer = TreeDrawer(tree_table=tree_table, ws=wb[SHEET_NAME])
+        tree_drawer.render()
 
 
         # 要らない罫線を消す
         # DEBUG_TIPS: このコードを不活性にして、必要な線は全部描かれていることを確認してください
         if True:
-            tree_eraser = TreeEraser(wb=wb)
-            tree_eraser.execute()
+            tree_eraser = TreeEraser(ws=wb[SHEET_NAME])
+            tree_eraser.render()
         else:
             print(f"消しゴム　使用中止中")
 
