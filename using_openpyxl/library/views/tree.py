@@ -39,7 +39,7 @@ class TreeView():
         # 現業と前行は、現ラウンドについて、テキストが等しい
         a = curr_record.node_at(node_th=node_th).text
         b = prev_record.node_at(node_th=node_th).text
-        print(f"[{datetime.datetime.now()}] {node_th=}  {a=}  {b=}")
+        print(f"[{datetime.datetime.now()}] {curr_record.no}件目 {node_th=}  is_same_as_avobe  {a=}  {b=}")
         return a == b
 
 
