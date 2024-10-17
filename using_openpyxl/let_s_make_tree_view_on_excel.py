@@ -9,8 +9,6 @@ import traceback
 
 from xltree import Config, Renderer
 
-CSV_FILE_PATH = '../data/tree_shiritori.csv'
-WB_FILE_PATH = '../temp/tree.xlsx'
 SHEET_NAME = 'Tree'
 
 
@@ -21,14 +19,32 @@ if __name__ == '__main__':
     """コマンドから実行時"""
 
     try:
+        csv_file_path = input(f"""\
+
+CSVファイルへのパスを入力してください
+Enter the path to the CSV file
+
+    Example: ../data/tree_shiritori.csv
+
+> """)
+
+        wb_file_path = input(f"""\
+
+エクセルのワークブック・ファイルへのパスを入力してください
+Enter the path to the Excel workbook(.xlsx) file
+
+    Example: ../temp/tree.xlsx
+
+> """)
+
         # 構成
         config = Config()
 
         # レンダラー生成
         renderer = Renderer(config=config)
         renderer.render(
-                csv_file_path=CSV_FILE_PATH,
-                wb_file_path=WB_FILE_PATH,
+                csv_file_path=csv_file_path,
+                wb_file_path=wb_file_path,
                 sheet_name=SHEET_NAME)
 
     except Exception as err:
