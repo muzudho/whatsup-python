@@ -6,6 +6,7 @@
 #
 
 import traceback
+import datetime
 
 from xltree import Config, Renderer
 
@@ -59,6 +60,9 @@ Enter the path to the Excel workbook(.xlsx) file
                 csv_file_path=csv_file_path,
                 wb_file_path=wb_file_path,
                 sheet_name=SHEET_NAME)
+
+        print(f"[{datetime.datetime.now()}] {wb_file_path} ファイルを確認してください")
+
 
     except Exception as err:
         print(f"""\

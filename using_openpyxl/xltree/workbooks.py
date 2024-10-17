@@ -465,8 +465,13 @@ class TreeEraser():
         row_th = 3
         while row_th <= ws.max_row: # 最終行まで全部見る
 
+            # 前行のセルには、左辺と可変に太い罫線があったか？
+            prerow_l_letter = False
+
             while True: # 仕切り直しの１セット
                 shall_break = False
+
+                currow_l_letter = False
 
                 # 罫線を確認
                 #
@@ -478,32 +483,43 @@ class TreeEraser():
                 if border is not None:
                     # セルの左辺に太い罫線が引かれており...
                     if border.left is not None and border.left.style == 'thick':
-                        # セルの下辺にも太い罫線が引かれていれば、［ラスト・シブリング］だ
+                        # セルの下辺にも太い罫線が引かれていれば、'└' 字か '├' 字のどちらかだ
                         if border.bottom is not None and border.bottom.style == 'thick':
-                            row_th_of_prev_last_underline = -1
-                            row_th_of_last_underline = -1
-                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 ラスト・シブリングなので、最後に見つけた左辺に罫線のないアンダーラインのことは忘れて仕切り直し")
-                            shall_break = True
+                            row_th_of_prev_last_underline = row_th_of_last_underline
+                            row_th_of_last_underline = row_th
+                            currow_l_letter = True
+                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 左側と下側に罫線。 '└' 字か '├' 字のどちらかだ。アンダーラインが第何行か覚えておく（第{row_th_of_last_underline}行）（１つ前は第{row_th_of_prev_last_underline}行）")
 
                         # 次行へ読み進めていく
                         else:
                             print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 左側に罫線")
                             pass
 
-                    # セルの左辺に太い罫線が引かれておらず、セルの下辺に太い罫線が引かれていたら、つながっていない垂線だ。それが第何行か覚えておいて仕切り直す
-                    elif border.bottom is not None and border.bottom.style == 'thick':
-                        row_th_of_prev_last_underline = row_th_of_last_underline
-                        row_th_of_last_underline = row_th
-                        print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 最後に見つけた、左辺に罫線のないアンダーラインが第何行か覚えておく（第{row_th_of_last_underline}行）（１つ前は第{row_th_of_prev_last_underline}行）")
-                        shall_break = True
-
-                    # セルの左辺にも、下辺にも、太い罫線が引かれていなければ、仕切り直し
+                    # セルの左辺に太い罫線が引かれていない
                     else:
-                        shall_break = True
-                        print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 セルの左辺にも下辺にも罫線が引かれていなかったので、仕切り直し")
+                        # "└"字。［ラスト・シブリング］だ
+                        if prerow_l_letter:
+                            row_th_of_prev_last_underline = -1
+                            row_th_of_last_underline = -1
+                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 ラスト・シブリングなので、最後に見つけた左辺に罫線のないアンダーラインのことは忘れて仕切り直し")
+                            shall_break = True
+
+                        # セルの下辺に太い罫線が引かれていたら、つながっていない垂線だ。それが第何行か覚えておいて仕切り直す
+                        elif border.bottom is not None and border.bottom.style == 'thick':
+                            row_th_of_prev_last_underline = row_th_of_last_underline
+                            row_th_of_last_underline = row_th
+                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 左辺に罫線のないアンダーラインが第何行か覚えておく（第{row_th_of_last_underline}行）（１つ前は第{row_th_of_prev_last_underline}行）")
+                            shall_break = True
+
+                        # セルの左辺にも、下辺にも、太い罫線が引かれていなければ、仕切り直し
+                        else:
+                            shall_break = True
+                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 セルの左辺にも下辺にも罫線が引かれていなかったので、仕切り直し")
 
 
                 row_th += 1
+
+                prerow_l_letter = currow_l_letter
 
                 if shall_break:
                     break
