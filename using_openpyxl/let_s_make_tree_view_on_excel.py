@@ -54,7 +54,7 @@ class TreeDrawer():
         # width はだいたい 'ＭＳ Ｐゴシック' サイズ11 の半角英文字の個数
 
         ws.column_dimensions['A'].width = 4     # no
-        ws.column_dimensions['B'].width = 1     # 空列
+        ws.column_dimensions['B'].width = 6     # "葉"
         ws.column_dimensions['C'].width = 20    # 根
         ws.column_dimensions['D'].width = 2     # 第１層　親側辺
         ws.column_dimensions['E'].width = 4     #       　子側辺
@@ -81,14 +81,23 @@ class TreeDrawer():
         # ヘッダー行にする
         row_th = 1
 
+        # NOTE データテーブルではなく、ビュー用途なので、テーブルとしての機能性は無視しています
         # A の代わりに {xl.utils.get_column_letter(1)} とも書ける
         ws[f'A{row_th}'] = 'No'
         # 第2列は空
-        ws[f'C{row_th}'] = '根'
-        ws[f'F{row_th}'] = '第１層'
-        ws[f'I{row_th}'] = '第２層'
-        ws[f'L{row_th}'] = '第３層'
-        ws[f'O{row_th}'] = '第４層'
+        ws[f'C{row_th}'] = '├─根─┤'
+        ws[f'D{row_th}'] = '├'
+        ws[f'E{row_th}'] = '─'
+        ws[f'F{row_th}'] = '第1層─┤'
+        ws[f'G{row_th}'] = '├'
+        ws[f'H{row_th}'] = '─'
+        ws[f'I{row_th}'] = '第2層─┤'
+        ws[f'J{row_th}'] = '├'
+        ws[f'K{row_th}'] = '─'
+        ws[f'L{row_th}'] = '第3層─┤'
+        ws[f'M{row_th}'] = '├'
+        ws[f'N{row_th}'] = '─'
+        ws[f'O{row_th}'] = '第4層─┤'
 
         # 第２行
         # ------
@@ -103,7 +112,7 @@ class TreeDrawer():
         self.forward_cursor(next_record=next_record)
 
         if self._curr_record.no is None:
-            print(f"[{datetime.datetime.now()}] {self._curr_record.no}件目 現在レコードのnoがナンだから無視（先読みのため、初回は空回し）")
+            print(f"[{datetime.datetime.now()}] 第{self._curr_record.no}葉 現在レコードのnoがナンだから無視（先読みのため、初回は空回し）")
             pass
 
 
@@ -128,7 +137,7 @@ class TreeDrawer():
             ws.row_dimensions[row3_th].height = 6
 
             ws[f'A{row1_th}'].value = self._curr_record.no
-            # B列は空
+            ws[f'B{row1_th}'].value = '葉'
 
 
             def draw_edge(depth_th, three_column_names, three_row_numbers):
@@ -174,16 +183,16 @@ class TreeDrawer():
                 nd = self._curr_record.node_at(depth_th=depth_th)
 
                 if nd is None:
-                    #print(f"[{datetime.datetime.now()}] 鉛筆(辺) {self._curr_record.no}件目 第{depth_th}層  nd がナンのノードは無視")
+                    #print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  nd がナンのノードは無視")
                     return
 
                 elif pd.isnull(nd.text):
-                    #print(f"[{datetime.datetime.now()}] 鉛筆(辺) {self._curr_record.no}件目 第{depth_th}層  nd.text が NaN のノードは無視")
+                    #print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  nd.text が NaN のノードは無視")
                     return
 
 
                 # 以下、描画
-                #print(f"[{datetime.datetime.now()}] 鉛筆(辺) {self._curr_record.no}件目 第{depth_th}層 辺を描画...")
+                #print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層 辺を描画...")
 
 
                 cn1 = three_column_names[0]
@@ -208,14 +217,14 @@ class TreeDrawer():
                             curr_record=self._curr_record,
                             prev_record=self._prev_record,
                             depth_th=depth_th):
-                        print(f"[{datetime.datetime.now()}] 鉛筆(辺) {self._curr_record.no}件目 第{depth_th}層  │")
+                        print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  │")
                         
                         ws[f'{cn2}{row1_th}'].border = leftside_border_to_vertical
                         ws[f'{cn2}{row2_th}'].border = leftside_border_to_vertical
                         ws[f'{cn2}{row3_th}'].border = leftside_border_to_vertical
                     
                     else:
-                        #print(f"[{datetime.datetime.now()}] 鉛筆(辺) {self._curr_record.no}件目 第{depth_th}層  空欄")
+                        #print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
                         pass
 
                     return
@@ -274,23 +283,23 @@ class TreeDrawer():
 
                 if kind == 'Horizontal':
                     ws[f'{cn2}{row1_th}'].border = under_border_to_child_horizontal
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) {self._curr_record.no}件目 第{depth_th}層  ─ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  ─ {nd.edge_text}")
                 
                 elif kind == 'Down':
                     ws[f'{cn2}{row1_th}'].border = under_border_to_child_down
                     ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_down
                     ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_down
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) {self._curr_record.no}件目 第{depth_th}層  ┬ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  ┬ {nd.edge_text}")
 
                 elif kind == 'TLetter':
                     ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_t_letter
                     ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_t_letter
                     ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_t_letter
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) {self._curr_record.no}件目 第{depth_th}層  ├ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  ├ {nd.edge_text}")
 
                 elif kind == 'Up':
                     ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_up
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) {self._curr_record.no}件目 第{depth_th}層  └ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  └ {nd.edge_text}")
                 
                 else:
                     raise ValueError(f"{kind=}")
@@ -311,11 +320,11 @@ class TreeDrawer():
                 nd = self._curr_record.node_at(depth_th=depth_th)
 
                 if nd is None:
-                    #print(f"[{datetime.datetime.now()}] 鉛筆(節) {self._curr_record.no}件目 第{depth_th}層  nd がナンのノードは無視")
+                    #print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  nd がナンのノードは無視")
                     return
 
                 elif pd.isnull(nd.text):
-                    #print(f"[{datetime.datetime.now()}] 鉛筆(節) {self._curr_record.no}件目 第{depth_th}層  nd.text が NaN のノードは無視")
+                    #print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  nd.text が NaN のノードは無視")
                     return
 
                 # 先祖から自分までが同じノードテキストのレコードが続くなら省く
@@ -323,7 +332,7 @@ class TreeDrawer():
                         curr_record=self._curr_record,
                         prev_record=self._prev_record,
                         depth_th=depth_th):
-                    #print(f"[{datetime.datetime.now()}] 鉛筆(節) {self._curr_record.no}件目 第{depth_th}層  同じディレクトリーは描画を省く")
+                    #print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  同じディレクトリーは描画を省く")
                     return
 
 
@@ -343,7 +352,7 @@ class TreeDrawer():
                 upside_node_border = Border(top=side, left=side, right=side)
                 downside_node_border = Border(bottom=side, left=side, right=side)
 
-                print(f"[{datetime.datetime.now()}] 鉛筆(節) {self._curr_record.no}件目 第{depth_th}層  □ {nd.text}")
+                print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  □ {nd.text}")
                 ws[f'{cn3}{row1_th}'].value = nd.text
                 ws[f'{cn3}{row1_th}'].fill = node_bgcolor
                 ws[f'{cn3}{row1_th}'].border = upside_node_border
