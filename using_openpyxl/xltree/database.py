@@ -59,9 +59,8 @@ class TreeRecord():
         no : int
             1から始まる連番。数詞は件
         node_list : list<TreeNode>
-            固定長ノード０～４。
-            第０層は根。
-            NOTE ノード数を増やしたいなら、ここを改造してください
+            ノードのリスト。
+            第０層は根
         """
         self._no = no
         self._node_list = node_list

@@ -64,25 +64,18 @@ class TreeDrawer():
 
 
         # 列の幅設定
-        # width はだいたい 'ＭＳ Ｐゴシック' サイズ11 の半角英文字の個数
-        # NOTE ノード数を増やしたいなら、ここを改造してください
-        column_width_dict = {
-            'A': self._config.dictionary['no_width'],                       # no
-            'B': self._config.dictionary['row_header_separator_width'],     # 空列
-            'C': self._config.dictionary['node_width'],                     # 根
-            'D': self._config.dictionary['parent_side_edge_width'],         # 第１層　親側辺
-            'E': self._config.dictionary['child_side_edge_width'],          #       　子側辺
-            'F': self._config.dictionary['node_width'],                     #         節
-            'G': self._config.dictionary['parent_side_edge_width'],         # 第２層  親側辺
-            'H': self._config.dictionary['child_side_edge_width'],          #         子側辺
-            'I': self._config.dictionary['node_width'],                     #         節
-            'J': self._config.dictionary['parent_side_edge_width'],         # 第３層  親側辺
-            'K': self._config.dictionary['child_side_edge_width'],          #         子側辺
-            'L': self._config.dictionary['node_width'],                     #         節
-            'M': self._config.dictionary['parent_side_edge_width'],         # 第４層  親側辺
-            'N': self._config.dictionary['child_side_edge_width'],          #         子側辺
-            'O': self._config.dictionary['node_width'],                     #         節
-        }
+        column_width_dict = {}
+        column_width_dict['A'] = self._config.dictionary['no_width']                        # no
+        column_width_dict['B'] = self._config.dictionary['row_header_separator_width']      # 空列
+        column_width_dict['C'] = self._config.dictionary['node_width']                      # 根
+
+        head_column_th = 4
+        for node_th in range(1, self._tree_table.actual_length_of_nodes):
+            column_width_dict[xl.utils.get_column_letter(head_column_th    )] = self._config.dictionary['parent_side_edge_width']   # 第n層  親側辺
+            column_width_dict[xl.utils.get_column_letter(head_column_th + 1)] = self._config.dictionary['child_side_edge_width']    #        子側辺
+            column_width_dict[xl.utils.get_column_letter(head_column_th + 2)] = self._config.dictionary['node_width']               #        節
+            head_column_th += 3
+
 
         for name, width in column_width_dict.items():
             ws.column_dimensions[name].width = width
