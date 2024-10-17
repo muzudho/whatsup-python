@@ -378,7 +378,7 @@ class TreeEraser():
     """要らない罫線を消す"""
 
 
-    def __init__(self, ws):
+    def __init__(self, tree_table, ws):
         """初期化
         
         Parameters
@@ -386,20 +386,21 @@ class TreeEraser():
         ws : openpyxl.Worksheet
             ワークシート
         """
+        self._tree_table = tree_table
         self._ws = ws
 
 
     def render(self):
         """描画"""
 
-        # NOTE ノード数を増やしたいなら、ここを改造してください
         # 指定の列の左側の垂直の罫線を見ていく
-        column_alphabet_list = ['E', 'H', 'K', 'N']
-        for column_alphabet in column_alphabet_list:
-            self._erase_unnecessary_border_by_column(column_alphabet=column_alphabet)
+        column_th = 5
+        for node_th in range(1, self._tree_table.actual_length_of_nodes):
+            self._erase_unnecessary_border_by_column(column_letter=xl.utils.get_column_letter(column_th))
+            column_th += 3
 
 
-    def _erase_unnecessary_border_by_column(self, column_alphabet):
+    def _erase_unnecessary_border_by_column(self, column_letter):
         """不要な境界線を消す"""
 
         # DEBUG_TIPS: デバッグ時は、罫線を消すのではなく、灰色に変えると見やすいです
@@ -440,7 +441,7 @@ class TreeEraser():
                 # ..+--  下向きの罫線が最後に出た箇所を調べる
                 #   |
                 #
-                border = ws[f'{column_alphabet}{row_th}'].border
+                border = ws[f'{column_letter}{row_th}'].border
                 if border is not None:
                     # セルの左辺に太い罫線が引かれており...
                     if border.left is not None and border.left.style == 'thick':
@@ -448,25 +449,25 @@ class TreeEraser():
                         if border.bottom is not None and border.bottom.style == 'thick':
                             row_th_of_prev_last_underline = -1
                             row_th_of_last_underline = -1
-                            print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 ラスト・シブリングなので、最後に見つけた左辺に罫線のないアンダーラインのことは忘れて仕切り直し")
+                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 ラスト・シブリングなので、最後に見つけた左辺に罫線のないアンダーラインのことは忘れて仕切り直し")
                             shall_break = True
 
                         # 次行へ読み進めていく
                         else:
-                            print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 左側に罫線")
+                            print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 左側に罫線")
                             pass
 
                     # セルの左辺に太い罫線が引かれておらず、セルの下辺に太い罫線が引かれていたら、つながっていない垂線だ。それが第何行か覚えておいて仕切り直す
                     elif border.bottom is not None and border.bottom.style == 'thick':
                         row_th_of_prev_last_underline = row_th_of_last_underline
                         row_th_of_last_underline = row_th
-                        print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 最後に見つけた、左辺に罫線のないアンダーラインが第何行か覚えておく（第{row_th_of_last_underline}行）（１つ前は第{row_th_of_prev_last_underline}行）")
+                        print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 最後に見つけた、左辺に罫線のないアンダーラインが第何行か覚えておく（第{row_th_of_last_underline}行）（１つ前は第{row_th_of_prev_last_underline}行）")
                         shall_break = True
 
                     # セルの左辺にも、下辺にも、太い罫線が引かれていなければ、仕切り直し
                     else:
                         shall_break = True
-                        print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 セルの左辺にも下辺にも罫線が引かれていなかったので、仕切り直し")
+                        print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 セルの左辺にも下辺にも罫線が引かれていなかったので、仕切り直し")
 
 
                 row_th += 1
@@ -480,9 +481,9 @@ class TreeEraser():
             end_row_to_erase = row_th_of_last_underline
 
             if row_th_of_last_underline != -1 and 0 < start_row_to_erase and start_row_to_erase < end_row_to_erase:
-                print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列 消しゴムを掛けたいのは第{start_row_to_erase}～{end_row_to_erase - 1}行")
+                print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列 消しゴムを掛けたいのは第{start_row_to_erase}～{end_row_to_erase - 1}行")
                 for row_th_to_erase in range(start_row_to_erase, end_row_to_erase):
                     # 消すか、見え消しにするか切り替えられるようにしておく
-                    ws[f'{column_alphabet}{row_th_to_erase}'].border = striked_border
+                    ws[f'{column_letter}{row_th_to_erase}'].border = striked_border
 
-        print(f"[{datetime.datetime.now()}] 消しゴム {column_alphabet}列第{row_th}行 消しゴム掛け終わり（最終は第{ws.max_row}行）")
+        print(f"[{datetime.datetime.now()}] 消しゴム {column_letter}列第{row_th}行 消しゴム掛け終わり（最終は第{ws.max_row}行）")

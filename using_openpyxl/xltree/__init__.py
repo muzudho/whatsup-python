@@ -87,7 +87,7 @@ class Renderer():
         # 要らない罫線を消す
         # DEBUG_TIPS: このコードを不活性にして、必要な線は全部描かれていることを確認してください
         if True:
-            tree_eraser = TreeEraser(ws=wb[sheet_name])
+            tree_eraser = TreeEraser(tree_table=tree_table, ws=wb[sheet_name])
             tree_eraser.render()
         else:
             print(f"消しゴム　使用中止中")
