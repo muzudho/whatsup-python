@@ -156,43 +156,42 @@ class TreeDrawer():
                 #
                 side = Side(style='thick', color='000000')
                 # デバッグ用に色を付けておく
-                red_side = Side(style='thick', color='660000')      # FF0000
-                orange_side = Side(style='thick', color='663300')   # FFCC00
-                green_side = Side(style='thick', color='006600')    # 00FF00
-                blue_side = Side(style='thick', color='000066')     # 0000FF
-                # 黄色は白字の上で見にくいのでやめとく
-                cyan_side = Side(style='thick', color='006666')     # 00FFFF
-                magenta_side = Side(style='thick', color='660066')  # FF00FF
-                # 親への接続は赤
-                border_to_parent = Border(bottom=red_side)
-                # 子への水平接続はオレンジ
-                under_border_to_child_horizontal = Border(bottom=orange_side)
-                # 子へのダウン接続はブルー
-                under_border_to_child_down = Border(bottom=blue_side)
-                leftside_border_to_child_down = Border(left=blue_side)
-                # 子へのＴ字接続はシアン
-                l_letter_border_to_child_t_letter = Border(left=cyan_side, bottom=cyan_side)
-                leftside_border_to_child_t_letter = Border(left=cyan_side)
-                # 子へのアップ接続はグリーン
-                l_letter_border_to_child_up = Border(left=green_side, bottom=green_side)
-                # 垂直接続はマゼンタ
-                leftside_border_to_vertical = Border(left=magenta_side)
+                #
+                #   黄色は白字の上で見にくいのでやめとく
+                #
+                red_side = Side(style='thick', color='FF0000')      # FF0000
+                orange_side = Side(style='thick', color='FFCC00')   # FFCC00
+                green_side = Side(style='thick', color='00FF00')    # 00FF00
+                blue_side = Side(style='thick', color='0000FF')     # 0000FF
+                cyan_side = Side(style='thick', color='00FFFF')     # 00FFFF
+                magenta_side = Side(style='thick', color='FF00FF')  # FF00FF
+                # ─字接続は赤
+                border_to_parent_horizontal = Border(bottom=red_side)
+                under_border_to_child_horizontal = Border(bottom=red_side)
+                # │字接続は緑
+                leftside_border_to_vertical = Border(left=green_side)
+                # ┬字接続は青
+                border_to_parent_downward = Border(bottom=blue_side)
+                under_border_to_child_downward = Border(bottom=blue_side)
+                leftside_border_to_child_downward = Border(left=blue_side)
+                # ├字接続は青緑
+                l_letter_border_to_child_rightward = Border(left=cyan_side, bottom=cyan_side)
+                leftside_border_to_child_rightward = Border(left=cyan_side)
+                # └字接続は橙
+                l_letter_border_to_child_upward = Border(left=orange_side, bottom=orange_side)
 
 
                 prerow_nd = self._prev_record.node_at(depth_th=depth_th)
                 nd = self._curr_record.node_at(depth_th=depth_th)
 
                 if nd is None:
-                    #print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  nd がナンのノードは無視")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  nd がナンのノードは無視")
                     return
 
+                # nd.text が NaN のノードは無視
                 elif pd.isnull(nd.text):
-                    #print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  nd.text が NaN のノードは無視")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
                     return
-
-
-                # 以下、描画
-                #print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層 辺を描画...")
 
 
                 cn1 = three_column_names[0]
@@ -203,8 +202,11 @@ class TreeDrawer():
                 row3_th = three_row_numbers[2]
 
 
-                # 同じノードテキストが続くところは垂直線にする
-                if prerow_nd is not None and nd.text == prerow_nd.text:
+                # 先祖から自分までが同じノードテキストのレコードが続くなら
+                if TreeView.is_same_between_ancestor_and_myself_as_avobe(
+                        curr_record=self._curr_record,
+                        prev_record=self._prev_record,
+                        depth_th=depth_th):
 
                     # 垂直線
                     #
@@ -224,52 +226,52 @@ class TreeDrawer():
                         ws[f'{cn2}{row3_th}'].border = leftside_border_to_vertical
                     
                     else:
-                        #print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
+                        print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
                         pass
 
                     return
-
-
-                # １列目：親ノードから伸びてきた枝
-                #
-                #   .
-                # --...
-                #   .
-                #
-                # 前ラウンドにノードがあれば、接続線を引く
-                #
-                if TreeView.can_connect_to_parent(
-                        curr_record=self._curr_record,
-                        prev_record=self._prev_record,
-                        depth_th=depth_th):
-                    ws[f'{cn1}{row1_th}'].border = border_to_parent
                 
 
-                # ２列目：分岐したエッジ
+                # # １列目：親ノードから伸びてきた枝
+                # #
+                # #   .
+                # # --...
+                # #   .
+                # #
+                # # 前ラウンドにノードがあれば、接続線を引く
+                # #
+                # if TreeView.can_connect_to_parent(
+                #         curr_record=self._curr_record,
+                #         prev_record=self._prev_record,
+                #         depth_th=depth_th):
+                #     ws[f'{cn1}{row1_th}'].border = border_to_parent
+
+
+                # ２列目：エッジ・テキスト
                 ws[f'{cn2}{row1_th}'].value = nd.edge_text
 
 
                 # 子ノードへの接続は４種類の線がある
                 #
-                # (1) Horizontal
+                # (1) ─字
                 #   .    under_border
                 # ...__  
                 #   .    None
                 #   .    None
                 #
-                # (2) Down
+                # (2) ┬字
                 #   .    under_border
                 # ..+__  
                 #   |    leftside_border
                 #   |    leftside_border
                 #
-                # (3) TLetter
+                # (3) ├字
                 #   |    l_letter_border
                 # ..+__  
                 #   |    leftside_border
                 #   |    leftside_border
                 #
-                # (4) Up
+                # (4) └字
                 #   |    l_letter_border
                 # ..+__  
                 #   .    None
@@ -281,24 +283,26 @@ class TreeDrawer():
                         next_record=self._next_record,
                         depth_th=depth_th)
 
-                if kind == 'Horizontal':
+                if kind == '─字':
+                    ws[f'{cn1}{row1_th}'].border = border_to_parent_horizontal
                     ws[f'{cn2}{row1_th}'].border = under_border_to_child_horizontal
                     print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  ─ {nd.edge_text}")
                 
-                elif kind == 'Down':
-                    ws[f'{cn2}{row1_th}'].border = under_border_to_child_down
-                    ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_down
-                    ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_down
+                elif kind == '┬字':
+                    ws[f'{cn1}{row1_th}'].border = border_to_parent_downward
+                    ws[f'{cn2}{row1_th}'].border = under_border_to_child_downward
+                    ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_downward
+                    ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_downward
                     print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  ┬ {nd.edge_text}")
 
-                elif kind == 'TLetter':
-                    ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_t_letter
-                    ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_t_letter
-                    ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_t_letter
+                elif kind == '├字':
+                    ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_rightward
+                    ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_rightward
+                    ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_rightward
                     print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  ├ {nd.edge_text}")
 
-                elif kind == 'Up':
-                    ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_up
+                elif kind == '└字':
+                    ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_upward
                     print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  └ {nd.edge_text}")
                 
                 else:
