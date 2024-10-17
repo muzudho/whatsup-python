@@ -344,49 +344,29 @@ class TreeDrawer():
                 ws[f'{cn3}{row2_th}'].border = downside_node_border
 
 
-            # NOTE ノード数を増やしたいなら、ここを改造してください
-
             # 第０層
             # ------
             depth_th = 0
             if depth_th < self._tree_table.actual_length_of_nodes:
-                draw_node(depth_th=depth_th, three_column_names=[None, None, 'C'], three_row_numbers=three_row_numbers)
+                column_letter = xl.utils.get_column_letter(3)   # 'C'
+                draw_node(depth_th=depth_th, three_column_names=[None, None, column_letter], three_row_numbers=three_row_numbers)
 
 
-            # 第１層
-            # ------
-            depth_th = 1
-            if depth_th < self._tree_table.actual_length_of_nodes:
-                three_column_names=['D', 'E', 'F']
-                draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
-                draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
+            COLUMN_WIDTH = 3
 
-
-            # 第２層
-            # ------
-            depth_th = 2
-            if depth_th < self._tree_table.actual_length_of_nodes:
-                three_column_names=['G', 'H', 'I']
-                draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
-                draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
-
-
-            # 第３層
-            # ------
-            depth_th = 3
-            if depth_th < self._tree_table.actual_length_of_nodes:
-                three_column_names=['J', 'K', 'L']
-                draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
-                draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
-
-
-            # 第４層
-            # ------
-            depth_th = 4
-            if depth_th < self._tree_table.actual_length_of_nodes:
-                three_column_names=['M', 'N', 'O']
-                draw_edge(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
-                draw_node(depth_th=depth_th, three_column_names=three_column_names, three_row_numbers=three_row_numbers)
+            # 第１～最終層
+            # ------------
+            for depth_th in range(1, self._tree_table.actual_length_of_nodes):
+                head_column_th = depth_th * COLUMN_WIDTH + 1
+                if depth_th < self._tree_table.actual_length_of_nodes:
+                    # 第1層は 'D', 'E', 'F'、以降、後ろにずれていく
+                    column_letter_list = [
+                        xl.utils.get_column_letter(head_column_th),
+                        xl.utils.get_column_letter(head_column_th + 1),
+                        xl.utils.get_column_letter(head_column_th + 2),
+                    ]
+                    draw_edge(depth_th=depth_th, three_column_names=column_letter_list, three_row_numbers=three_row_numbers)
+                    draw_node(depth_th=depth_th, three_column_names=column_letter_list, three_row_numbers=three_row_numbers)
 
 
 class TreeEraser():
