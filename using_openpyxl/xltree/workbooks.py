@@ -12,7 +12,7 @@ class TreeDrawer():
     """エクセルで罫線などを駆使して、樹形図を描画します"""
 
 
-    def __init__(self, tree_table, ws):
+    def __init__(self, tree_table, ws, config):
         """初期化
         
         Parameters
@@ -24,6 +24,8 @@ class TreeDrawer():
         """
         self._tree_table = tree_table
         self._ws = ws
+        self._config = config
+
         self._prev_record = TreeRecord.new_empty()
         self._curr_record = TreeRecord.new_empty()
         self._next_record = TreeRecord.new_empty()
@@ -63,28 +65,38 @@ class TreeDrawer():
 
         # 列の幅設定
         # width はだいたい 'ＭＳ Ｐゴシック' サイズ11 の半角英文字の個数
+        # NOTE ノード数を増やしたいなら、ここを改造してください
+        column_width_dict = {
+            'A': self._config.dictionary['no_width'],                       # no
+            'B': self._config.dictionary['row_header_separator_width'],     # 空列
+            'C': self._config.dictionary['node_width'],                     # 根
+            'D': self._config.dictionary['parent_side_edge_width'],         # 第１層　親側辺
+            'E': self._config.dictionary['child_side_edge_width'],          #       　子側辺
+            'F': self._config.dictionary['node_width'],                     #         節
+            'G': self._config.dictionary['parent_side_edge_width'],         # 第２層  親側辺
+            'H': self._config.dictionary['child_side_edge_width'],          #         子側辺
+            'I': self._config.dictionary['node_width'],                     #         節
+            'J': self._config.dictionary['parent_side_edge_width'],         # 第３層  親側辺
+            'K': self._config.dictionary['child_side_edge_width'],          #         子側辺
+            'L': self._config.dictionary['node_width'],                     #         節
+            'M': self._config.dictionary['parent_side_edge_width'],         # 第４層  親側辺
+            'N': self._config.dictionary['child_side_edge_width'],          #         子側辺
+            'O': self._config.dictionary['node_width'],                     #         節
+        }
 
-        ws.column_dimensions['A'].width = 4     # no
-        ws.column_dimensions['B'].width = 6     # "葉"
-        ws.column_dimensions['C'].width = 20    # 根
-        ws.column_dimensions['D'].width = 2     # 第１層　親側辺
-        ws.column_dimensions['E'].width = 4     #       　子側辺
-        ws.column_dimensions['F'].width = 20    #         節
-        ws.column_dimensions['G'].width = 2     # 第２層  親側辺
-        ws.column_dimensions['H'].width = 4     #         子側辺
-        ws.column_dimensions['I'].width = 20    #         節
-        ws.column_dimensions['J'].width = 2     # 第３層  親側辺
-        ws.column_dimensions['K'].width = 4     #         子側辺
-        ws.column_dimensions['L'].width = 20    #         節
-        ws.column_dimensions['M'].width = 2     # 第４層  親側辺
-        ws.column_dimensions['N'].width = 4     #         子側辺
-        ws.column_dimensions['O'].width = 20    #         節
+        for name, width in column_width_dict.items():
+            ws.column_dimensions[name].width = width
 
 
         # 行の高さ設定
         # height の単位はポイント。初期値 8。昔のアメリカ人が椅子に座ってディスプレイを見たとき 1/72 インチに見える大きさが 1ポイント らしいが、そんなんワカラン。目視確認してほしい
-        ws.row_dimensions[1].height = 13
-        ws.row_dimensions[2].height = 13
+        row_height_dict = {
+            1: self._config.dictionary['header_height'],
+            2: self._config.dictionary['column_header_separator_height'],
+        }
+
+        for row_number, height in row_height_dict.items():
+            ws.row_dimensions[row_number].height = height
 
 
         # 第１行
@@ -123,7 +135,7 @@ class TreeDrawer():
         self._forward_cursor(next_record=next_record)
 
         if self._curr_record.no is None:
-            print(f"[{datetime.datetime.now()}] 第{self._curr_record.no}葉 最初のレコードは先読みのため、空回しします")
+            print(f"[{datetime.datetime.now()}] 第{self._curr_record.no}件 最初のレコードは先読みのため、空回しします")
             pass
 
 
@@ -150,7 +162,7 @@ class TreeDrawer():
             ws.row_dimensions[row3_th].height = 6
 
             ws[f'A{row1_th}'].value = self._curr_record.no
-            ws[f'B{row1_th}'].value = '葉'
+            # B列は空
 
 
             def draw_edge(depth_th, three_column_names, three_row_numbers):
@@ -202,7 +214,7 @@ class TreeDrawer():
                 nd = self._curr_record.node_at(depth_th=depth_th)
 
                 if nd is None or pd.isnull(nd.text):
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  空欄")
                     return
 
 
@@ -220,7 +232,7 @@ class TreeDrawer():
                         prev_record=self._prev_record,
                         depth_th=depth_th):
 
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  │")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  │")
                     # 垂直線
                     #
                     #   |    leftside_border
@@ -269,24 +281,24 @@ class TreeDrawer():
                 if kind == '─字':
                     ws[f'{cn1}{row1_th}'].border = border_to_parent_horizontal
                     ws[f'{cn2}{row1_th}'].border = under_border_to_child_horizontal
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  ─ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  ─ {nd.edge_text}")
                 
                 elif kind == '┬字':
                     ws[f'{cn1}{row1_th}'].border = border_to_parent_downward
                     ws[f'{cn2}{row1_th}'].border = under_border_to_child_downward
                     ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_downward
                     ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_downward
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  ┬ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  ┬ {nd.edge_text}")
 
                 elif kind == '├字':
                     ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_rightward
                     ws[f'{cn2}{row2_th}'].border = leftside_border_to_child_rightward
                     ws[f'{cn2}{row3_th}'].border = leftside_border_to_child_rightward
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  ├ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  ├ {nd.edge_text}")
 
                 elif kind == '└字':
                     ws[f'{cn2}{row1_th}'].border = l_letter_border_to_child_upward
-                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}葉 第{depth_th}層  └ {nd.edge_text}")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(辺) 第{self._curr_record.no}件 第{depth_th}層  └ {nd.edge_text}")
                 
                 else:
                     raise ValueError(f"{kind=}")
@@ -313,7 +325,7 @@ class TreeDrawer():
                         curr_record=self._curr_record,
                         prev_record=self._prev_record,
                         depth_th=depth_th):
-                    print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  空欄")
+                    print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}件 第{depth_th}層  空欄")
                     return
 
 
@@ -336,7 +348,7 @@ class TreeDrawer():
                 upside_node_border = Border(top=side, left=side, right=side)
                 downside_node_border = Border(bottom=side, left=side, right=side)
 
-                print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}葉 第{depth_th}層  □ {nd.text}")
+                print(f"[{datetime.datetime.now()}] 鉛筆(節) 第{self._curr_record.no}件 第{depth_th}層  □ {nd.text}")
                 ws[f'{cn3}{row1_th}'].value = nd.text
                 ws[f'{cn3}{row1_th}'].fill = node_bgcolor
                 ws[f'{cn3}{row1_th}'].border = upside_node_border

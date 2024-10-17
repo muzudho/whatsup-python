@@ -57,7 +57,7 @@ class TreeRecord():
         Parameters
         ----------
         no : int
-            1から始まる連番。数詞は葉
+            1から始まる連番。数詞は件
         node_list : list<TreeNode>
             固定長ノード０～４。
             第０層は根。

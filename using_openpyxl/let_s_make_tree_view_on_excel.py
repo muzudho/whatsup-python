@@ -7,7 +7,7 @@
 
 import traceback
 
-from xltree import XlTree
+from xltree import Config, Renderer
 
 CSV_FILE_PATH = '../data/tree_shiritori.csv'
 WB_FILE_PATH = '../temp/tree.xlsx'
@@ -21,9 +21,12 @@ if __name__ == '__main__':
     """コマンドから実行時"""
 
     try:
-        # エクセルツリー生成
-        xltree = XlTree()
-        xltree.generate(
+        # 構成
+        config = Config()
+
+        # レンダラー生成
+        renderer = Renderer(config=config)
+        renderer.render(
                 csv_file_path=CSV_FILE_PATH,
                 wb_file_path=WB_FILE_PATH,
                 sheet_name=SHEET_NAME)
