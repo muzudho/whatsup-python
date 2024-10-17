@@ -9,7 +9,6 @@ class TreeView():
         """前ラウンドのノードに接続できるか？"""
 
         prenode_th = node_th - 1
-        prenode_th = prenode_th - 1
 
         # 先頭行は、ラウンド０も含め、全部親ノードに接続できる
         if curr_record.no == 1:
@@ -37,11 +36,9 @@ class TreeView():
         if curr_record.no == 1:
             return False
 
-        curr_node_th = node_th - 1
-
         # 現業と前行は、現ラウンドについて、テキストが等しい
-        a = curr_record.node_at(node_th=curr_node_th).text
-        b = prev_record.node_at(node_th=curr_node_th).text
+        a = curr_record.node_at(node_th=node_th).text
+        b = prev_record.node_at(node_th=node_th).text
         print(f"[{datetime.datetime.now()}] {node_th=}  {a=}  {b=}")
         return a == b
 
@@ -127,12 +124,11 @@ class TreeView():
             return 'Down'
 
 
-        prenode_th = node_th - 2
-        # if prenode_th < 0:
-        #     # NOTE -1 でアクセスすると、最後尾ノードを拾ってしまうので注意
+        prenode_th = node_th - 1
+        if prenode_th < 0:
+            raise ValueError(f"node_th は負数であってはいけません {prenode_th=}")
 
 
-        node_th = node_th - 1
         node = curr_record.node_at(node_th=node_th)
         prenode = curr_record.node_at(node_th=prenode_th)
         print(f"""[{datetime.datetime.now()}] 水平線 {node_th}節：{node.text=}  {prenode_th}節：{prenode.text=}""")
