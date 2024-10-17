@@ -19,7 +19,7 @@ class Config():
             設定
 
             列の幅設定。width はだいたい 'ＭＳ Ｐゴシック' サイズ11 の半角英文字の個数
-            * `no_width` - A列の幅。no
+            * `no_width` - A列の幅。no列
             * `row_header_separator_width` - B列の幅。空列
             * `node_width` - 例：C, F, I ...列の幅。ノードの箱の幅
             * `parent_side_edge_width` - 例：D, G, J ...列の幅。エッジの水平線のうち、親ノードの方

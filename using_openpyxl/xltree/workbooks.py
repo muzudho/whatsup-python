@@ -4,6 +4,7 @@ import openpyxl as xl
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.borders import Border, Side
 
+from xltree.library import nth
 from xltree.database import TreeNode, TreeRecord
 from xltree.models import TreeModel
 
@@ -117,40 +118,30 @@ class TreeDrawer():
         # NOTE データテーブルではなく、ビュー用途なので、テーブルとしての機能性は無視しています
         # A の代わりに {xl.utils.get_column_letter(1)} とも書ける
         ws[f'A{row_th}'] = 'No'
-        # 第2列は空
-        ws[f'C{row_th}'] = 'Root'
-        ws[f'F{row_th}'] = '1st'
-        ws[f'I{row_th}'] = '2nd'
-        ws[f'L{row_th}'] = '3rd'
-        ws[f'O{row_th}'] = '4th'
-
-
         ws[f'A{row_th}'].fill = TreeDrawer._bgcolor_list[0]
         ws[f'A{row_th}'].font = TreeDrawer._fgcolor_list[0]
+
+        # B列は空
         ws[f'B{row_th}'].fill = TreeDrawer._bgcolor_list[0]
 
+        ws[f'C{row_th}'] = 'Root'
         ws[f'C{row_th}'].fill = TreeDrawer._bgcolor_list[1]
         ws[f'C{row_th}'].font = TreeDrawer._fgcolor_list[1]
 
-        ws[f'D{row_th}'].fill = TreeDrawer._bgcolor_list[0]
-        ws[f'E{row_th}'].fill = TreeDrawer._bgcolor_list[0]
-        ws[f'F{row_th}'].fill = TreeDrawer._bgcolor_list[0]
-        ws[f'F{row_th}'].font = TreeDrawer._fgcolor_list[0]
+        flip = 0
+        head_column_th = 4
 
-        ws[f'G{row_th}'].fill = TreeDrawer._bgcolor_list[1]
-        ws[f'H{row_th}'].fill = TreeDrawer._bgcolor_list[1]
-        ws[f'I{row_th}'].fill = TreeDrawer._bgcolor_list[1]
-        ws[f'I{row_th}'].font = TreeDrawer._fgcolor_list[1]
+        for node_th in range(1, self._tree_table.actual_length_of_nodes):
+            ws[f'{xl.utils.get_column_letter(head_column_th    )}{row_th}'].fill = TreeDrawer._bgcolor_list[flip]
+            ws[f'{xl.utils.get_column_letter(head_column_th + 1)}{row_th}'].fill = TreeDrawer._bgcolor_list[flip]
+            ws[f'{xl.utils.get_column_letter(head_column_th + 2)}{row_th}'].fill = TreeDrawer._bgcolor_list[flip]
+            ws[f'{xl.utils.get_column_letter(head_column_th + 2)}{row_th}'].font = TreeDrawer._fgcolor_list[flip]
 
-        ws[f'J{row_th}'].fill = TreeDrawer._bgcolor_list[0]
-        ws[f'K{row_th}'].fill = TreeDrawer._bgcolor_list[0]
-        ws[f'L{row_th}'].fill = TreeDrawer._bgcolor_list[0]
-        ws[f'L{row_th}'].font = TreeDrawer._fgcolor_list[0]
+            # 列名
+            ws[f'{xl.utils.get_column_letter(head_column_th + 2)}{row_th}'] = nth(node_th)
 
-        ws[f'M{row_th}'].fill = TreeDrawer._bgcolor_list[1]
-        ws[f'N{row_th}'].fill = TreeDrawer._bgcolor_list[1]
-        ws[f'O{row_th}'].fill = TreeDrawer._bgcolor_list[1]
-        ws[f'O{row_th}'].font = TreeDrawer._fgcolor_list[1]
+            flip = (flip + 1) % 2
+            head_column_th += 3
 
 
         # 第２行
